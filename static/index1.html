@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Transcripciones</title>
+    <link rel="stylesheet" href="./index.css" />
+    <script src="https://cdn.jsdelivr.net/npm/@pipedrive/app-extensions-sdk@0/dist/index.umd.js"></script>
+  </head>
+
+  <body>
+    <div class="principal">
+      <!-- Barra lateral -->
+      <div class="barraLateral">
+        <div class="logoLeanSales">
+          <h1>Lean Sales</h1>
+        </div>
+
+        <div class="User">
+          <div class="userCenter">
+            <h3 id="userJS">daniel.oliva@humansys.ai</h3>
+          </div>
+        </div>
+
+        <div class="Notifi">
+          <button>
+            <div class="divImage">
+              <img src="./images/notifi.png" />
+            </div>
+            <div class="divInfo">
+              <h2>Notificaciones</h2>
+            </div>
+          </button>
+        </div>
+
+        <div class="Drive">
+          <button>
+            <div class="divImage">
+              <img src="./images/carpeta.png" />
+            </div>
+            <div class="divInfo">
+              <h2>Google Drive</h2>
+            </div>
+          </button>
+        </div>
+
+        <div class="Informes">
+          <button>
+            <div class="divImage">
+              <img src="./images/informes.png" />
+            </div>
+            <div class="divInfo">
+              <h2>Informes</h2>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <!-- Barra derecha -->
+      <div class="barraDerecha">
+        <div class="menuButton">
+            <button id="toggleSidebar">☰</button>
+        </div>
+        <div class="infoArriba">
+          <div class="logoTranscript">
+            <h1>Transcripciones</h1>
+          </div>
+
+          <div class="divBotones">
+            <div class="divBotonBuscar">
+              <button>
+                    <div class="divImage">
+                        <img src="./images/search.png"/>
+                    </div>
+                    <div class="divInfo">
+                        Buscar
+                    </div>
+              </button>
+            </div>
+
+            <div class="divBotonHistorial">
+              <button>
+                    <div class="divImage">
+                        <img src="./images/historial.png" />
+                    </div>
+                    <div class="divInfo">
+                        Historial
+                    </div>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="TranscripcionesDates">
+          <div class="TranscripcionesReturn">
+            <h1>Centrado</h1>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      (async function () {
+        const sdk = await new AppExtensionsSDK();
+        await sdk.initialize();
+
+        const queryParams = new URLSearchParams(window.location.search);
+        const userId = queryParams.get("userId");
+        const companyId = queryParams.get("companyId");
+        const idDeal = queryParams.get("selectedIds");
+
+        console.log(`userId: ${userId}`);
+        console.log(`companyId: ${companyId}`);
+        console.log(`idDeal: ${idDeal}`);
+
+         // Toggle barra lateral en móviles
+        const toggleBtn = document.getElementById('toggleSidebar');
+        const sidebar = document.querySelector('.barraLateral');
+
+        toggleBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('active');
+        });
+      })();
+    </script>
+  </body>
+</html>

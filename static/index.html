@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Transcripciones</title>
+    <link rel="stylesheet" href="./index.css" />
+</head>
+
+  <body>
+    <div class="principal">
+      <!-- Barra lateral -->
+      <div class="barraLateral">
+        <div class="logoLeanSales">
+          <h1>Lean Sales</h1>
+        </div>
+
+        <div class="User">
+          <div class="userCenter">
+            <h3 id="userJS"></h3>
+            <script>
+            (async function () {
+              // Tomar los parámetros de la URL
+              const queryParams = new URLSearchParams(window.location.search);
+              const userId = queryParams.get("userId");
+
+              const nameUser = document.getElementById('userJS');
+
+              // Mostrar en consola
+              console.log("UserId recibido:", userId);
+              try {
+                // Se Necesita https Para Poder Hacer Las Peticiones Ya Que Lo Requiere PipeDrive.
+                const response = await fetch('https://624b67d32698.ngrok-free.app/usuario', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ userId: userId })
+                });
+
+                const data = await response.json();
+
+                // console.log(data);
+
+                if (data.error) {
+                  console.log(`Error: ${data.error}`);
+                } 
+                else if (data.usuario) {
+                  const correo = data.usuario.correo;
+                  console.log(correo);
+                  nameUser.textContent = correo;
+                } 
+                else if (data.mensaje) {
+                  console.log(`Error: ${data.mensaje}`);
+                }
+              } catch (err) {
+                  console.log("Error En la Petición");
+              }
+            })();
+            </script>
+          </div>
+        </div>
+
+        <div class="Notifi">
+          <button>
+            <div class="divImage">
+              <img src="./images/notifi.png" />
+            </div>
+            <div class="divInfo">
+              <h2>Notificaciones</h2>
+            </div>
+          </button>
+        </div>
+
+        <div class="Drive">
+          <button>
+            <div class="divImage">
+              <img src="./images/carpeta.png" />
+            </div>
+            <div class="divInfo">
+              <h2>Google Drive</h2>
+            </div>
+          </button>
+        </div>
+
+        <div class="Informes">
+          <button>
+            <div class="divImage">
+              <img src="./images/informes.png" />
+            </div>
+            <div class="divInfo">
+              <h2>Informes</h2>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <!-- Barra derecha -->
+      <div class="barraDerecha">
+        <div class="menuButton">
+            <button id="toggleSidebar">☰</button>
+        </div>
+        <div class="infoArriba">
+          <div class="logoTranscript">
+            <h1>Transcripciones</h1>
+          </div>
+
+          <div class="divBotones">
+            <div class="divBotonBuscar">
+              <button>
+                    <div class="divImage">
+                        <img src="./images/search.png"/>
+                    </div>
+                    <div class="divInfo">
+                        Buscar
+                    </div>
+              </button>
+            </div>
+
+            <div class="divBotonHistorial">
+              <button>
+                    <div class="divImage">
+                        <img src="./images/historial.png" />
+                    </div>
+                    <div class="divInfo">
+                        Historial
+                    </div>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="TranscripcionesDates">
+          <div class="TranscripcionesReturn">
+            <h1>Centrado</h1>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

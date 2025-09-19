@@ -1,0 +1,418 @@
+.principal {
+  display: flex;
+  width: 100%;
+  height: 100vh;
+}
+
+/* Barra lateral */
+.barraLateral {
+  background-color: white;
+  width: 20%;
+  height: 100%;
+}
+
+.logoLeanSales {
+  display: flex;
+  height: 15%;
+  justify-content: center;
+  align-items: center;
+}
+
+.logoLeanSales h1 {
+  color: #4f46e5;
+  font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+  font-size: 3.5em;
+}
+
+.User {
+  width: 100%;
+  height: 10%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.2em;
+}
+
+.User .userCenter {
+  width: 80%;
+  overflow-wrap: break-word;
+  text-align: center;
+}
+
+/* Notificaciones */
+.Notifi {
+  width: 100%;
+  height: 10%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.Notifi button {
+  width: 70%;
+  display: flex;
+  justify-content: left;
+  align-items: center;
+  background-color: #fff;
+  border: none;
+}
+
+.Notifi img {
+  width: 90%;
+  height: auto;
+}
+
+/* Google Drive */
+.Drive {
+  width: 100%;
+  height: 10%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.Drive button {
+  width: 70%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #fff;
+  border: none;
+}
+
+.Drive img {
+  width: 90%;
+  height: auto;
+}
+
+/* Informes */
+.Informes {
+  width: 100%;
+  height: 10%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.Informes button {
+  width: 70%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #fff;
+  border: none;
+}
+
+.Informes img {
+  width: 90%;
+  height: auto;
+}
+
+/* Barra derecha */
+.barraDerecha {
+  background-color: #d2d7e1;
+  height: 100%;
+  width: 100%;
+  border-radius: 30px;
+}
+
+.infoArriba {
+  width: 100%;
+  height: 15%;
+  display: flex;
+}
+
+.logoTranscript {
+  width: 30%;
+  display: flex;
+  align-items: center;
+  padding-left: 3%;
+}
+
+.logoTranscript h1 {
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+  font-size: 3em;
+}
+
+.divBotones {
+  width: 70%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Botón buscar */
+.divBotonBuscar {
+  width: 40%;
+  height: 100%;
+  display: flex;
+  justify-content: right;
+  align-items: center;
+}
+
+.divBotonBuscar button {
+  background-color: #4f46e5;
+  width: 50%;
+  height: 25%;
+  font-family: 'Courier New', Courier, monospace;
+  color: white;
+  font-size: 1.5em;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 10px;
+  border: none;
+}
+
+.divBotonBuscar button img {
+  width: 40px;
+  height: 40px;
+  margin-right: 5%;
+}
+
+/* Botón historial */
+.divBotonHistorial {
+  width: 30%;
+  height: 100%;
+  display: flex;
+  justify-content: right;
+  align-items: center;
+}
+
+.divBotonHistorial button {
+  background-color: rgb(210, 215, 225);
+  width: 50%;
+  height: 25%;
+  font-family: 'Courier New', Courier, monospace;
+  color: #747a87;
+  font-size: 1.5em;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 10px;
+  border: none;
+}
+
+.divBotonHistorial button img {
+  width: 40px;
+  height: 40px;
+  margin-right: 5%;
+}
+
+/* Transcripciones */
+.TranscripcionesDates {
+  height: 85%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.TranscripcionesReturn {
+  background-color: white;
+  height: 90%;
+  width: 90%;
+
+  /* Quitar Esto Ya Que Solo Lo Puse Para Ver Si Funcionaba. */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid rgba(128, 128, 128, 0.519);
+  border-radius: 20px;
+}
+
+.menuButton {
+    display: none; /* Por defecto está oculto */
+}
+
+
+/* Estilos generales */
+.divImage {
+  width: 20%;
+}
+
+.divInfo {
+  width: 80%;
+}
+
+/* Tablets (840px a 1080px) */
+@media (min-width: 840px) and (max-width: 1080px) {
+  .barraLateral {
+    width: 30%;
+  }
+
+  .logoLeanSales {
+    font-size: clamp(0.3rem, 2vw, 0.6rem);
+  }
+
+  .User .userCenter {
+    font-size: clamp(0.3rem, 2vw, 0.9rem);
+  }
+
+  .Notifi button,
+  .Drive button,
+  .Informes button {
+    width: 100%;
+  }
+
+  .logoTranscript {
+    width: 40%;
+    font-size: clamp(0.3rem, 2vw, 0.8rem);
+  }
+
+  .divBotones {
+    width: 60%;
+  }
+
+  .divBotonBuscar {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .divBotonBuscar button {
+    width: 70%;
+    font-size: clamp(0.3rem, 2vw, 1.2rem);
+  }
+
+  .divBotonHistorial {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .divBotonHistorial button {
+    width: 75%;
+    font-size: clamp(0.3rem, 2vw, 1.2rem);
+  }
+}
+
+/* Laptops/PC (más de 1024px) */
+@media (min-width: 1025px) {
+}
+
+
+/* Celulares pequeños (hasta 600px) */
+@media (max-width: 600px) {
+    .barraLateral {
+        position: fixed;
+        left: -250px; /* Oculta la barra */
+        top: 0;
+        width: 250px;
+        height: 100%;
+        background-color: white;
+        box-shadow: 2px 0 5px rgba(0,0,0,0.3);
+        transition: left 0.3s ease;
+        z-index: 1000;
+    }
+
+    .barraLateral.active {
+        left: 0; /* Muestra la barra */
+    }
+
+    .menuButton {
+        display: block; /* Solo visible en móviles */
+        position: fixed;
+        top: 10px;
+        left: 10px;
+        z-index: 1100;
+    }
+
+    .logoLeanSales h1{
+        font-size: clamp(0.3rem, 8vw, 1.7rem);
+    }
+
+    .User{
+        font-size: clamp(0.3rem, 3vw, 1.2rem);
+        height: 15%;
+    }
+
+    .Notifi{
+        height: 10%;
+    }
+
+    .Notifi button{
+        height: 80%;
+    }
+
+    .Drive{
+        height: 10%;
+    }
+
+    .Drive button{
+        height: 80%;
+    }
+
+    .Notifi button{
+        height: 80%;
+    }
+
+    .Informes{
+        height: 10%;
+    }
+
+    .Informes button{
+        height: 80%;
+    }
+
+    .logoTranscript{
+        width: 40%;
+    }
+
+    .logoTranscript h1{
+        font-size: clamp(0.3rem, 5vw, 1.2rem);
+    }
+
+    .divBotones{
+        width: 60%;
+    }
+
+    .divBotonBuscar{
+        width: 50%;
+        font-size: clamp(0.3rem, 4vw, 0.5rem);
+    }
+
+    .divBotonBuscar button{
+        width: 90%;
+        height: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .divBotonBuscar .divImage{
+        width: 20%;
+    }
+
+    .divBotonBuscar .divInfo{
+        width: 80%;
+    }
+
+    .divBotonBuscar .divImage img{
+        width: 100%;
+        height: 100%;
+    }
+
+    .divBotonHistorial{
+        width: 50%;
+        font-size: clamp(0.3rem, 4vw, 0.5rem);
+    }
+
+    .divBotonHistorial button{
+        width: 90%;
+        height: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .divBotonHistorial .divImage{
+        width: 20%;
+    }
+
+    .divBotonHistorial .divInfo{
+        width: 80%;
+    }
+
+    .divBotonHistorial .divImage img{
+        width: 100%;
+        height: 100%;
+    }
+}

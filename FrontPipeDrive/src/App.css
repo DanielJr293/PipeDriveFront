@@ -1,0 +1,268 @@
+/*
+    Div Principal En Donde Se Almacena Todos Los Componentes
+*/
+.Index{
+    min-height: 100vh;
+    height: auto;
+    width: 95%;
+    margin: 0 auto;
+    border: 1px solid rgba(110, 107, 107, 0.691);
+    border-radius: 30px;
+    display: flex;
+}
+
+/*
+    Div De La Barra Izquierda En Donde Esta La Barra De Navegación, El 
+    Primer Componente De React.
+*/
+.BarraIzq{
+    width: 25%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.Sidebar{
+    width: 100%;
+    height: 100%;
+}
+
+.divLogo{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+    font-size: 2em;
+    font-size: clamp(1rem, 5vw, 2rem);
+    color: rgb(80, 71, 229);
+    height: 15%;
+}
+
+.divBarra{
+    height: 70%;
+}
+
+.divUser{
+    height: 15%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+    color: rgb(64, 73, 89);
+    font-size: clamp(0.5rem, 5vw, 1rem);
+    font-weight: bold;
+}
+
+.divButtons{
+    height: 85%;
+}
+
+.divBtn1{
+    height: 12%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.divBtn1 button{
+    width: 70%;
+    height: 80%;
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+    font-size: 1em;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(164, 162, 162, 0.104);
+    border: none;
+    border-radius: 20px;
+}
+
+.divImgBtn1{
+    width: 30%;
+    height: 100%;
+    display: flex;
+    justify-content: right;
+    align-items: center;
+}
+
+.divInfBtn1{
+    width: 70%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+    font-size: 1.2em;
+    color: rgb(128, 134, 147);
+}
+
+.divButton{
+    height: 15%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.divButton button{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 50%;
+    height: 35%;
+    background-color: rgba(164, 162, 162, 0.104);
+    border: none;
+    border-radius: 20px;
+}
+
+/*
+    Barra Derecha De La Interfaz.
+*/
+
+.BarraDer{
+    width: 75%;
+    background-color: aliceblue;
+    min-height: 8rem;
+}
+
+.divHeader{
+    display: flex;
+    height: 20%;
+}
+
+.divTranscrip{
+    width: 40%;
+    font-size: 1.5rem;
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.divButtons1{
+    width: 60%;
+    display: flex;
+}
+
+.divSearch1{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 60%;
+}
+
+.divSearchInput{
+    width: 60%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.divSearchInput input{
+    height: 10%;
+    width: 80%;
+    border-radius: 20px;
+    padding: 1%;
+    text-align: center;
+    border: none;
+}
+
+.divSearch{
+    width: 40%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.divSearch button{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 80%;
+    height: 20%;
+    background-color: rgba(164, 162, 162, 0.988);
+    border: none;
+    border-radius: 20px;
+}
+
+.divHisto1{
+    width: 40%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.divHisto1 button{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 50%;
+    height: 25%;
+    background-color: rgba(164, 162, 162, 0.104);
+    border: none;
+    border-radius: 20px;
+}
+
+.btnArchivo{
+    border: 1px solid gray;
+    border-radius: 20px;
+    display: flex;
+    width: 70%;
+    min-height: 3rem;
+    background-color: rgba(28, 31, 32, 0.5); 
+    margin: 5px;
+}
+
+.divBtnArch{
+    width: 20%;
+    min-height: 4rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.divBtnArchText{
+    width: 80%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+    font-size: clamp(0.5rem, 5vw, 1.2rem);
+    font-weight: bold;
+}
+
+/*
+    --------------------------------Media Para Que Sea Responsivo--------------------------------
+*/
+@media (max-width: 1280px) {
+    .divLogo{
+        font-size: clamp(1rem, 5vw, 1.5rem);
+    }
+
+    .divUser{
+        font-size: clamp(0.5rem, 5vw, 0.8rem);
+    }
+
+    .divBtn1 button{
+        width: 80%;
+    }
+
+    .divButton button{
+        width: 80%;
+    }
+
+    .divTranscrip{
+        font-size: clamp(0.5rem, 5vw, 1.2rem);
+    }
+
+    .divSearch button{
+        width: 100%;
+        height: 20%;
+    }
+
+    .divHisto1 button{
+        width: 80%;
+        height: 20%;
+    }
+}
