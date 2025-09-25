@@ -1,0 +1,62 @@
+---
+name: General Coding Standards
+globs:
+  - "**/*"
+priority: 1
+description:
+  This rule defines the basic coding principles and conventions that must be applied to all code within the PipeDriveFront project. The goal is to ensure readability, maintainability, and consistency of the code.
+alwaysApply: true
+---
+
+# Estándares Generales de Codificación para PipeDriveFront
+
+Esta regla define los principios y convenciones básicas de codificación que deben aplicarse a todo el código dentro del proyecto PipeDriveFront. El objetivo es asegurar la legibilidad, mantenibilidad y consistencia del código.
+
+## 1. Nomenclatura
+
+*   **Variables y Funciones (JavaScript/Python)**: Utilizar `camelCase` para variables y funciones.
+    *   **DO**: `const userName = 'John';`, `def calculateTotal():`
+    *   **DON'T**: `const user_name = 'John';`, `def calculate_total():`
+*   **Clases y Componentes (JavaScript/React)**: Utilizar `PascalCase` para nombres de clases y componentes React.
+    *   **DO**: `class UserProfile {}`, `function UserCard() {}`
+    *   **DON'T**: `class userProfile {}`, `function userCard() {}`
+*   **Archivos**:
+    *   **JavaScript/React**: `PascalCase` para componentes React (ej. `UserCard.jsx`). `kebab-case` para archivos de utilidad o módulos (ej. `api-service.js`).
+    *   **Python**: `snake_case` para nombres de archivos (ej. `data_processor.py`).
+
+## 2. Formato del Código
+
+*   **Indentación**: Utilizar 2 espacios para JavaScript/React y 4 espacios para Python.
+*   **Saltos de Línea**: Mantener los archivos con un salto de línea al final.
+*   **Comillas (JavaScript)**: Preferir comillas simples (`'`) para cadenas, y backticks (```) para template literals.
+*   **Punto y Coma (JavaScript)**: Omitir puntos y comas cuando sea posible y el linter lo permita.
+
+## 3. Comentarios
+
+*   Escribir comentarios claros y concisos cuando la intención del código no sea obvia.
+*   Evitar comentarios redundantes que simplemente repiten lo que el código ya dice.
+*   Utilizar `TODO:` para tareas pendientes y `FIXME:` para errores conocidos que necesitan ser corregidos.
+
+## 4. Estructura de Archivos
+
+*   **React**: Mantener los componentes pequeños y enfocados en una única responsabilidad.
+*   **Python (Flask)**: Separar la lógica de la aplicación (ej. rutas, lógica de negocio, acceso a datos) en módulos o funciones distintas para mejorar la organización.
+
+## 5. Manejo de Errores
+
+*   Implementar un manejo de errores robusto y consistente en ambos frontend y backend.
+*   En el backend, retornar códigos de estado HTTP apropiados junto con mensajes de error descriptivos en formato JSON.
+*   En el frontend, manejar los errores de la API de manera que la UI pueda reaccionar adecuadamente (ej. mostrar mensajes al usuario, reintentar operaciones).
+
+## 6. Importaciones
+
+*   **JavaScript/React**: Organizar las importaciones agrupando las de librerías de terceros primero, luego las de componentes del proyecto, y finalmente las de módulos de utilidad, con un salto de línea entre grupos.
+*   **Python**: Seguir el estándar PEP 8 para las importaciones (standard library, third-party, local imports, cada grupo ordenado alfabéticamente).
+
+## 7. Performance (Consideraciones iniciales)
+
+*   **React**: Optimizar la renderización de componentes cuando sea posible (ej. `React.memo`, `useCallback`, `useMemo` para componentes con lógica compleja o listas grandes).
+*   **Python**: Evitar operaciones bloqueantes en el hilo principal del servidor Flask si el rendimiento es crítico. Optimizar consultas a la base de datos.
+
+alwaysApply: true
+---
