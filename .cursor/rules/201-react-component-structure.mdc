@@ -1,0 +1,45 @@
+# Estructura y Nomenclatura de Componentes React
+
+Esta regla establece las convenciones para la creación y organización de componentes funcionales de React dentro del proyecto PipeDriveFront, asegurando consistencia y mantenibilidad en el código del frontend.
+
+## 1. Nomenclatura de Componentes
+
+*   **Componentes Funcionales**: Deben usar `PascalCase`. El nombre del archivo `.jsx` (o `.tsx`) debe coincidir con el nombre del componente.
+    *   **DO**: `function UserProfile() {}` en `UserProfile.jsx`
+    *   **DON'T**: `function userProfile() {}` o `user-profile.jsx`
+
+## 2. Estructura del Componente Funcional
+
+*   **Definición**: Utilizar la sintaxis de función `function ComponentName() {}` o `const ComponentName = () => {}` para definir componentes.
+*   **Hooks**: `useState`, `useEffect`, `useRef`, etc., deben ser declarados en la parte superior del componente.
+*   **Lógica Interna**: La lógica de negocio o de manejo de eventos debe estar contenida dentro del componente o en funciones auxiliares importadas.
+*   **Retorno JSX**: El JSX debe ser el valor principal retornado por el componente, envuelto en un fragmento (`<>...</>`) o un elemento padre si hay múltiples elementos raíz.
+
+## 3. Manejo de Props
+
+*   **Nomenclatura**: Las props deben usar `camelCase`.
+*   **Desestructuración**: Desestructurar las props al inicio de la función del componente para mejorar la legibilidad.
+    *   **DO**: `function MyComponent({ propOne, propTwo }) {}`
+    *   **DON'T**: `function MyComponent(props) { console.log(props.propOne); }`
+*   **Tipado (si se usa TypeScript)**: Definir interfaces o tipos para las props para asegurar la seguridad de tipo y la claridad.
+
+## 4. Funciones Auxiliares (Helper Functions)
+
+*   **Ubicación**: Las funciones que no son componentes y no requieren acceso directo al estado o props del componente (sin ser pasadas como argumento) pueden ser definidas:
+    *   **Fuera del Componente**: Si son funciones puras o utilidades generales (ej. `archivosFolders`, `contenidoArch` en `TranscriptionList.jsx`).
+    *   **Dentro del Componente (con `useCallback` / `useMemo`)**: Si dependen del estado o props del componente y necesitan ser memoizadas para optimizaciones de rendimiento.
+*   **Nomenclatura**: Utilizar `camelCase` para funciones auxiliares.
+
+## 5. Organización de Archivos
+
+*   **Componentes**: Cada componente principal debe residir en su propio archivo.
+*   **Módulos de Utilidad**: Las funciones auxiliares o la lógica de negocio reusable deben organizarse en módulos separados (ej. `utils/api.js`).
+
+## 6. CSS
+
+*   **Importación**: Los archivos CSS asociados a un componente pueden ser importados directamente en el archivo del componente (ej. `import './MyComponent.css';`).
+*   **Clases**: Utilizar nombres de clases descriptivos y que eviten conflictos globales (ej. siguiendo una convención BEM o CSS Modules si se implementa).
+description:
+globs:
+alwaysApply: true
+---

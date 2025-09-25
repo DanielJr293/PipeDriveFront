@@ -1,0 +1,40 @@
+# Estilo de Componentes y Uso de CSS en React
+
+Esta regla establece las directrices para la aplicación de estilos y el uso de CSS en los componentes de React del proyecto PipeDriveFront, buscando asegurar una apariencia coherente y una gestión de estilos eficiente.
+
+## 1. Organización de Archivos CSS
+
+*   **CSS por Componente**: Cuando un componente tiene estilos específicos que no son globales, crear un archivo CSS dedicado (`ComponentName.css`) junto al archivo del componente (`ComponentName.jsx`).
+    *   **DO**: `MyComponent.jsx` y `MyComponent.css` en el mismo directorio.
+*   **Importación**: Importar el archivo CSS directamente en el componente React (`import './MyComponent.css';`).
+*   **Estilos Globales**: Los estilos que se aplican a toda la aplicación deben residir en un archivo CSS global (ej. `App.css` o `index.css`).
+
+## 2. Convenciones de Nomenclatura de Clases CSS
+
+*   **BEM (Block-Element-Modifier)**: Considerar el uso de la metodología BEM para nombrar las clases CSS. Esto ayuda a crear clases con nombres más semánticos, modulares y específicos, reduciendo conflictos.
+    *   **Bloque**: `navbar`
+    *   **Elemento**: `navbar__item`
+    *   **Modificador**: `navbar__item--active`
+*   **Nomenclatura Descriptiva**: Utilizar nombres de clases que describan la finalidad o el contenido, en lugar de la apariencia.
+    *   **DO**: `.user-card-container`, `.button-primary`
+    *   **DON'T**: `.red-box`, `.left-float`
+
+## 3. Especificidad y Cascading
+
+*   **Evitar Selectores Excesivamente Específicos**: Evitar el uso de selectores ID o encadenamientos de selectores (`div > ul > li > a`) que aumenten innecesariamente la especificidad y dificulten la sobrescritura de estilos.
+*   **Priorizar Clases**: Preferir el uso de clases sobre selectores de tipo o atributos para mantener la flexibilidad.
+
+## 4. Unidades de Medida
+
+*   **Relativas (rem, em, vw, vh)**: Priorizar las unidades de medida relativas (`rem`, `em`) sobre las absolutas (`px`) para mejorar la responsividad y la accesibilidad.
+*   **Variables CSS**: Utilizar variables CSS para valores que se repiten (colores, fuentes, espaciados) para facilitar la gestión de temas y la consistencia.
+    *   **DO**: `var(--primary-color)`
+
+## 5. Rendimiento y Carga de Estilos
+
+*   **Minificación**: Asegurar que los archivos CSS sean minificados en producción para reducir el tamaño de los archivos y mejorar los tiempos de carga.
+*   **Evitar `@import` en CSS**: Evitar el uso de `@import` dentro de los archivos CSS, ya que puede causar problemas de rendimiento al generar peticiones HTTP adicionales. Preferir la importación de CSS en JavaScript.
+description:
+globs:
+alwaysApply: true
+---

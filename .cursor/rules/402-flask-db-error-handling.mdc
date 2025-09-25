@@ -1,0 +1,47 @@
+# Interacciones con Base de Datos y Manejo de Errores en Flask
+
+Esta regla define las mejores prácticas para la interacción con la base de datos MySQL y el manejo de errores asociados en la aplicación Flask del proyecto PipeDriveFront. El objetivo es asegurar operaciones de base de datos seguras, eficientes y robustas.
+
+## 1. Gestión de Conexiones a la Base de Datos
+
+*   **Variables de Entorno**: Utilizar variables de entorno (cargadas con `dotenv`) para almacenar credenciales de la base de datos (`DB_HOST`, `DB_USER`, `DB_PASS`, `DB_NAME`). **Nunca codificar credenciales directamente en el código.**
+*   **Conexión por Solicitud**: Establecer una nueva conexión a la base de datos por cada solicitud de la API, o utilizar un pool de conexiones si la aplicación escala y se requiere optimización.
+*   **Cierre de Conexiones**: Asegurarse siempre de cerrar la conexión y el cursor de la base de datos después de cada operación, preferiblemente utilizando un bloque `finally` para garantizar que se cierren incluso si ocurre un error.
+    *   **DO**:
+        ```python
+        conn = None
+        cursor = None
+        try:
+            conn = mysql.connector.connect(...)
+            cursor = conn.cursor()
+            # ... operaciones de DB ...
+        except Exception as e:
+            # ... manejar error ...
+        finally:
+            if cursor:
+                cursor.close()
+            if conn:
+                conn.close()
+        ```
+
+## 2. Ejecución de Consultas (Queries)
+
+*   **Consultas Parametrizadas**: **Siempre** utilizar consultas parametrizadas para protegerse contra ataques de inyección SQL. Pasar los valores como una tupla o diccionario al método `cursor.execute()`.
+    *   **DO**: `cursor.execute("SELECT * FROM users WHERE id = %s", (user_id,))`
+    *   **DON'T**: `cursor.execute(f"SELECT * FROM users WHERE id = {user_id}")`
+*   **Modo de Diccionario**: Configurar el cursor para que devuelva resultados como diccionarios (`cursor = conn.cursor(dictionary=True)`) para facilitar el acceso a los datos por nombre de columna.
+
+## 3. Manejo de Errores Específicos de la Base de Datos
+
+*   **Bloques `try-except`**: Envolver las operaciones de la base de datos en bloques `try-except` para capturar y manejar excepciones específicas de la base de datos (ej. `mysql.connector.Error`).
+*   **Respuestas de Error Apropiadas**: Cuando ocurre un error de base de datos, retornar un código de estado HTTP `500 Internal Server Error` y un mensaje de error genérico al cliente (para evitar exponer detalles sensibles de la base de datos), mientras se registra el error completo en el servidor.
+    *   **DO**: `return jsonify({'error': 'Error interno del servidor'}), 500`
+
+## 4. Transacciones
+
+*   **Uso de Transacciones**: Para operaciones que implican múltiples escrituras en la base de datos y que deben ser atómicas, utilizar transacciones (`conn.start_transaction()`, `conn.commit()`, `conn.rollback()`).
+*   **Manejo de Errores en Transacciones**: En caso de error dentro de una transacción, realizar un `rollback` para asegurar la integridad de los datos.
+description:
+globs:
+alwaysApply: true
+---

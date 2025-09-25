@@ -1,0 +1,52 @@
+# Validación de Propiedades (Props) en Componentes React
+
+Esta regla define las convenciones para la validación de las propiedades (props) pasadas a los componentes funcionales de React en el proyecto PipeDriveFront. La validación de props es crucial para asegurar que los componentes reciban los datos esperados, previniendo errores en tiempo de ejecución y mejorando la documentación interna.
+
+## 1. Uso de `prop-types`
+
+*   **Recomendación**: Para proyectos JavaScript, se recomienda encarecidamente el uso de la librería `prop-types` para definir los tipos esperados de las props.
+*   **Definición**: Las definiciones de `propTypes` deben colocarse al final del archivo del componente, después de la declaración del componente.
+    *   **DO**:
+        ```jsx
+        function MyComponent({ name, age }) { /* ... */ }
+
+        MyComponent.propTypes = {
+          name: PropTypes.string.isRequired,
+          age: PropTypes.number,
+        };
+        ```
+*   **Tipos Comunes**: Utilizar los tipos de `PropTypes` adecuados (`string`, `number`, `bool`, `array`, `object`, `func`, `node`, `element`, `instanceOf`, `oneOf`, `oneOfType`, `arrayOf`, `objectOf`, `shape`, `exact`).
+*   **Props Requeridas**: Marcar las props que son absolutamente necesarias para el funcionamiento del componente como `isRequired`.
+
+## 2. Default Props
+
+*   **Propósito**: Utilizar `defaultProps` para establecer valores por defecto para props opcionales. Esto asegura que el componente siempre tenga un valor para esas props, incluso si no se proporcionan explícitamente.
+*   **Definición**: `defaultProps` debe definirse después de `propTypes`.
+    *   **DO**:
+        ```jsx
+        MyComponent.defaultProps = {
+          age: 0,
+        };
+        ```
+
+## 3. Consideraciones para TypeScript
+
+*   Si el proyecto migra a TypeScript, la validación de props se manejará a través de interfaces (`interface Props {}`) o tipos (`type Props = {}`), haciendo que `prop-types` sea redundante.
+*   En un entorno TypeScript, las props requeridas se definen como propiedades obligatorias en la interfaz, y las opcionales con `?`.
+    *   **DO (TypeScript)**:
+        ```typescript jsx
+        interface MyComponentProps {
+          name: string;
+          age?: number;
+        }
+
+        const MyComponent: React.FC<MyComponentProps> = ({ name, age = 0 }) => { /* ... */ };
+        ```
+
+## 4. Documentación Implícita
+
+*   La definición clara de `propTypes` (o interfaces de TypeScript) actúa como una forma de documentación para otros desarrolladores y para el asistente de IA, indicando qué datos espera el componente.
+description:
+globs:
+alwaysApply: true
+---

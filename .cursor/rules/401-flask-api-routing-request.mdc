@@ -1,0 +1,45 @@
+# Gestión de Rutas y Solicitudes en API Flask
+
+Esta regla define las mejores prácticas para la creación de rutas (endpoints) y el manejo de solicitudes HTTP en la aplicación Flask del proyecto PipeDriveFront. El objetivo es asegurar una API consistente, segura y fácil de mantener.
+
+## 1. Definición de Rutas (Endpoints)
+
+*   **Decoradores**: Utilizar el decorador `@app.route()` para definir las rutas de la API, especificando los métodos HTTP permitidos (ej. `methods=['GET', 'POST']`).
+    *   **DO**:
+        ```python
+        @app.route('/users', methods=['GET'])
+        def get_users():
+            pass
+        ```
+    *   **DON'T**: Definir la lógica de la ruta sin especificar métodos o utilizando rutas genéricas que no reflejen el recurso.
+*   **Nomenclatura**: Las rutas deben ser descriptivas y utilizar nombres de recursos en plural (`/users`, `/products`).
+*   **Versión de API**: Considerar la inclusión de versiones en las rutas (ej. `/v1/users`) para facilitar futuras evoluciones de la API.
+
+## 2. Manejo de Solicitudes HTTP
+
+*   **Acceso a Datos de Solicitud**: Utilizar `request.get_json()` para obtener datos JSON del cuerpo de la solicitud para métodos como `POST` o `PUT`.
+*   **Acceso a Parámetros de Consulta**: Utilizar `request.args.get()` para acceder a los parámetros de consulta de la URL.
+*   **Acceso a Datos de Formulario**: Utilizar `request.form.get()` para acceder a datos enviados en formularios (`application/x-www-form-urlencoded` o `multipart/form-data`).
+
+## 3. Validación de Datos de Entrada
+
+*   **Validación Temprana**: Realizar la validación de los datos de entrada tan pronto como sea posible al inicio de la función de la ruta.
+*   **Respuestas de Error Claras**: Si la validación falla, retornar una respuesta de error con un código de estado HTTP apropiado (ej. `400 Bad Request`) y un mensaje descriptivo en formato JSON.
+    *   **DO**: `return jsonify({'error': 'Falta el userId'}), 400`
+    *   **DON'T**: Devolver errores genéricos o sin código de estado.
+*   **Librerías de Validación**: Para validaciones complejas, considerar el uso de librerías de validación como `Marshmallow` o `Pydantic` para Pyhon.
+
+## 4. Respuestas HTTP
+
+*   **Códigos de Estado Apropiados**: Devolver siempre códigos de estado HTTP que reflejen el resultado de la operación (ej. `200 OK`, `201 Created`, `204 No Content`, `400 Bad Request`, `401 Unauthorized`, `403 Forbidden`, `404 Not Found`, `500 Internal Server Error`).
+*   **Formato JSON**: Todas las respuestas de la API deben estar en formato JSON utilizando `jsonify()`.
+    *   **DO**: `return jsonify({'message': 'Usuario creado', 'id': user_id}), 201`
+    *   **DON'T**: Devolver cadenas de texto o HTML directamente.
+
+## 5. Manejo de Errores a Nivel Global
+
+*   Implementar un manejo de errores global en Flask (usando `app.errorhandler`) para capturar excepciones no manejadas y devolver respuestas de error JSON consistentes.
+description:
+globs:
+alwaysApply: true
+---

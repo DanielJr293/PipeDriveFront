@@ -1,0 +1,40 @@
+# Precedencia y Orden de Carga de Reglas (Meta-Regla)
+
+Esta meta-regla establece cómo se deben cargar y aplicar las Reglas Cursor en el proyecto PipeDriveFront, definiendo un sistema de precedencia para resolver posibles conflictos y asegurar una guía consistente para el asistente de IA.
+
+## 1. Principio Fundamental
+
+Las reglas se aplican en un orden específico, y las reglas más específicas o de mayor `order` (número más alto) tienen precedencia sobre las más generales o de menor `order`.
+
+## 2. Sistema de Numeración y Categorías
+
+Las reglas se organizan y numeran en bloques de 100 para indicar su categoría general y su orden relativo:
+
+*   **000-099: Principios Fundamentales y Metodología**
+    *   Reglas esenciales de codificación y la metodología de trabajo con IA (ej. `001-general-coding-standards.mdc`, `010-raise-methodology-overview.mdc`). Estas son las reglas base.
+*   **100-199: Estándares Tecnológicos Generales**
+    *   Reglas que aplican a tecnologías específicas usadas en el proyecto (ej. React, Flask, MySQL) pero de naturaleza general para esa tecnología (ej. convenciones de nombres para componentes React, estructura básica de módulos Python).
+*   **200-399: Patrones de Arquitectura y Diseño de Componentes**
+    *   Reglas que definen patrones de diseño específicos o la estructura de componentes más compleja (ej. cómo estructurar un servicio RESTful, patrones de estado en React).
+*   **400-499: Backend (Flask/Python)**
+    *   Reglas específicas para el desarrollo del backend con Flask y Python (ej. manejo de rutas, acceso a base de datos, seguridad).
+*   **500-599: Frontend (React/JavaScript)**
+    *   Reglas específicas para el desarrollo del frontend con React y JavaScript (ej. uso de hooks, gestión de estado, patrones de UI).
+*   **900-999: Meta-Reglas**
+    *   Reglas que gobiernan el propio sistema de reglas y el comportamiento del asistente de IA (ej. `901-ia-rule-management.mdc`, `902-rule-precedence.mdc`). Estas reglas tienen la máxima precedencia en lo que respecta a la gestión del sistema de reglas.
+
+## 3. Resolución de Conflictos
+
+En caso de conflicto entre reglas:
+
+*   **Mayor `order`**: La regla con el número `order` más alto tiene precedencia.
+*   **`globs` más específicos**: Si dos reglas tienen el mismo `order` pero diferentes `globs`, la regla con el `glob` más específico (que coincide con un subconjunto más pequeño de archivos) tiene precedencia.
+*   **Orden Alfabético**: Si el `order` y los `globs` son igualmente específicos, el orden alfabético del nombre del archivo de la regla (`.mdc`) puede servir como desempate final (aunque esto debe ser raro con una buena planificación).
+
+## 4. Aplicación Global
+
+Esta meta-regla debe ser aplicada a todos los archivos `.mdc` dentro del directorio `.cursor/rules/` para asegurar que el sistema de reglas se autogobierne de manera consistente.
+description:
+globs:
+alwaysApply: true
+---

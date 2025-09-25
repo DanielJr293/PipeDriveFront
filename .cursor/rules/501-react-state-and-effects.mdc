@@ -1,0 +1,47 @@
+# Gestión de Estado y Efectos en React
+
+Esta regla define las mejores prácticas para el manejo del estado local y los efectos secundarios (side effects) en los componentes funcionales de React dentro del proyecto PipeDriveFront. El objetivo es asegurar un comportamiento predecible, optimizar el rendimiento y evitar errores comunes.
+
+## 1. Uso de `useState`
+
+*   **Propósito**: Utilizar `useState` para gestionar el estado local específico de un componente que puede cambiar con el tiempo y que debe provocar una re-renderización de la UI.
+*   **Inicialización**: Proporcionar un valor inicial directamente o una función de inicialización para estados complejos.
+*   **Actualizaciones Inmutables**: Siempre actualizar el estado de manera inmutable, especialmente para objetos y arrays, usando el *spread operator* o funciones de actualización (`setMyState(prev => ...)`).
+    *   **DO**: `setItems(prevItems => [...prevItems, newItem]);`
+    *   **DON'T**: `items.push(newItem); setItems(items);`
+
+## 2. Uso de `useEffect`
+
+*   **Propósito**: `useEffect` es para efectos secundarios que ocurren después del renderizado, como peticiones de datos, suscripciones, manipulación directa del DOM o sincronización con sistemas externos.
+*   **Dependencias**: Declarar explícitamente todas las dependencias (`props`, `state`, funciones que son estables o memoizadas) en el array de dependencias (`[dep1, dep2]`).
+    *   **Array Vacío (`[]`)**: Usar `[]` si el efecto debe ejecutarse solo una vez después del montaje inicial (similar a `componentDidMount`). Asegurarse de que las funciones dentro del efecto no cambien entre renderizados si se usa `[]`.
+    *   **Sin Array de Dependencias**: Evitar omitir el array de dependencias, ya que esto hará que el efecto se ejecute en cada re-renderizado, lo que puede causar bucles infinitos o problemas de rendimiento.
+*   **Funciones de Limpieza**: Retornar una función de limpieza de `useEffect` para cualquier efecto que requiera limpiar recursos (ej. desuscripciones, timers) cuando el componente se desmonte o antes de que el efecto se vuelva a ejecutar.
+    *   **DO**: `useEffect(() => { const timer = setInterval(() => {}, 1000); return () => clearInterval(timer); }, []);`
+
+## 3. Lógica Asíncrona
+
+*   **Dentro de `useEffect`**: Las funciones asíncronas deben ser definidas *dentro* de `useEffect` si son parte del efecto, o llamadas desde `useEffect`.
+    *   **DO**:
+        ```jsx
+        useEffect(() => {
+          const fetchData = async () => { /* ... */ };
+          fetchData();
+        }, []);
+        ```
+    *   **DON'T**: `useEffect(async () => { /* ... */ }, []);` (Esto puede llevar a condiciones de carrera si no se maneja correctamente).
+*   **Funciones Externas**: Para lógica asíncrona reusable, definirla fuera del componente y pasar las dependencias necesarias como argumentos (ej. `archivosFolders`, `contenidoArch`).
+
+## 4. `useRef`
+
+*   **Propósito**: Utilizar `useRef` para acceder directamente a un elemento DOM, o para almacenar un valor mutable que no provoca re-renderizaciones del componente cuando cambia (ej. `ejecutado` en `TranscriptionList.jsx`).
+*   **No para Re-renderizados**: No usar `useRef` para gestionar el estado que debe reflejarse en la UI, ya que los cambios en un ref no activan re-renderizaciones.
+
+## 5. Optimización del Rendimiento (Memoización)
+
+*   Considerar el uso de `useCallback` para memoizar funciones pasadas a componentes hijos para evitar re-renderizaciones innecesarias.
+*   Considerar `useMemo` para memoizar valores computados costosos.
+description:
+globs:
+alwaysApply: true
+---

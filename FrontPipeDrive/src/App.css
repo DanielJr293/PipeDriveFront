@@ -210,7 +210,7 @@
     display: flex;
     width: 70%;
     min-height: 3rem;
-    background-color: rgba(28, 31, 32, 0.5); 
+    background-color: rgba(28, 31, 32, 0.139); 
     margin: 5px;
 }
 
@@ -234,9 +234,22 @@
 
 .divFunciones{
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     min-height: 6rem;
+}
+
+.divFunciones .buttonReturn{
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+    font-size: clamp(1rem, 5vw, 1.5rem);
+    font-weight: bold;
+    margin-top: 5%;
+    border: none;
+    padding: 12px;
+    border-radius: 15px;
+    background-color: rgb(73, 185, 73);
+    color: white;
 }
 
 .primerasFunciones{

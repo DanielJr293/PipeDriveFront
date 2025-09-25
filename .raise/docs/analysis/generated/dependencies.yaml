@@ -1,0 +1,30 @@
+external_dependencies:
+  - name: react
+    type: library
+    purpose: Framework principal para la construcción de la interfaz de usuario.
+    criticidad: ALTA
+  - name: react-dom/client
+    type: library
+    purpose: Librería para renderizar componentes de React en el DOM.
+    criticidad: ALTA
+  - name: lucide-react
+    type: library
+    purpose: Colección de iconos para la interfaz de usuario.
+    criticidad: MEDIA
+
+infrastructure_dependencies:
+  - name: Backend API (via VITE_URL_NGROK)
+    type: service
+    purpose: Proporciona datos y lógica de negocio para la gestión de usuarios y archivos de Google Drive.
+    criticidad: ALTA
+    endpoints_consumed:
+      - /usuario
+      - /DriveFolderArch
+      - /DriveInfoArch
+      - /DriveRoot
+
+local_dependencies:
+  - name: App.css
+    type: stylesheet
+    purpose: Estilos CSS globales para la aplicación.
+    criticidad: MEDIA

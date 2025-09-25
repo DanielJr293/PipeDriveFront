@@ -115,6 +115,7 @@ function TranscriptionList() {
    */
   const [selectedFile, setSelectedFile] = useState(null);
 
+
   /**
    * Función Para Obtener Los Datos De La Raiz De Google Drive "/".
    */
@@ -164,11 +165,27 @@ function TranscriptionList() {
           Volver a la lista
         </button>
    * */  
+
+  async function ResumenLlamada(dates) {
+    console.log("Datos", dates);
+    const params = new URLSearchParams(window.location.search);   // Obteniendo Los Parametros De La URL.
+    const idDealEnv = params.get("idDeal");
+    const id = params.get("userId"); 
+    const WEBHOOK = import.meta.env.VITE_URL_AGENT; 
+    const peti = await fetch(`${WEBHOOK}/agent`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ query: `Realiza El Resumen De La Llamada De Esto ${dates.Contenido}`, idDeal: idDealEnv, userId: id}),                     // Enviando Solo Nuestros UserID.
+    });
+    const resp = await peti.json();                             // Obteniendo La Respuesta o Promesa De La Petición
+    console.log(resp);
+  }
+  
   if (selectedFile) {
     return (
       <div className="divFunciones">
         <div className="primerasFunciones">
-          <button className="divFunc1">
+          <button className="divFunc1" onClick={() => ResumenLlamada(selectedFile)}>
             <div className="divFunc1Icono">
               <BookText size={40}/>
             </div>
@@ -181,6 +198,12 @@ function TranscriptionList() {
             Hola 2
           </div>
         </div>
+        <button
+          onClick={() => setSelectedFile(null)}
+          className="buttonReturn"
+        >
+          Volver a la lista
+        </button>
       </div>
     );
   }
@@ -193,11 +216,12 @@ function TranscriptionList() {
       style={{
         display: "flex",
         flexDirection: "column",
-        justifyContent: "center",
         alignItems: "center",
-        maxHeight: "80%",
-        overflow: "auto",
-      }}
+        height: "800px",        // 👈 usa height fijo, no solo maxHeight
+        overflowY: "auto",      // scroll vertical
+        overflowX: "hidden",    // oculta horizontal
+        boxSizing: "border-box" // asegura que paddings no sumen
+    }}
     >
       {items.map((item) => (
         <FileOrFolder
