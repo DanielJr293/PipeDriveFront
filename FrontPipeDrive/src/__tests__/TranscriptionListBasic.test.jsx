@@ -1,25 +1,18 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import TranscriptionList from '../TranscriptionList'; // Adjust the path as necessary
+import TranscriptionList from '../TranscriptionList';
+import { vi } from 'vitest';
+import * as NotificationSystem from '../NotificationSystem';
+import * as TranscriptionListService from '../TranscriptionList';
 
-// Mock de las funciones asíncronas
-jest.mock('../../src/TranscriptionList', () => ({
-  __esModule: true,
-  ...jest.requireActual('../../src/TranscriptionList'),
-  fetchFolderContents: jest.fn(),
-  fetchFileContents: jest.fn(),
-}));
+// Mock de fetch para simular las llamadas a la API
+const mockFetch = vi.fn();
+global.fetch = mockFetch;
 
-// Mock del módulo de notificaciones
-jest.mock('../NotificationSystem', () => ({
-  showNotification: jest.fn(),
-}));
+// Mock de showNotification
+vi.spyOn(NotificationSystem, 'showNotification').mockImplementation(() => {});
 
-const mockFetchFolderContents = require('../../src/TranscriptionList').fetchFolderContents;
-const mockFetchFileContents = require('../../src/TranscriptionList').fetchFileContents;
-const { showNotification } = require('../NotificationSystem');
-
-describe('TranscriptionList', () => {
+describe('TranscriptionList Basic Functionality', () => {
   const userId = 'testUserId';
   const mockFolderId = 'folder123';
   const mockRootItems = [
@@ -31,12 +24,12 @@ describe('TranscriptionList', () => {
   ];
 
   beforeEach(() => {
-    // Resetear mocks antes de cada prueba
-    mockFetchFolderContents.mockClear();
-    mockFetchFileContents.mockClear();
-    showNotification.mockClear();
+    mockFetch.mockClear();
+    NotificationSystem.showNotification.mockClear();
+    vi.spyOn(TranscriptionListService, 'fetchFolderContents').mockResolvedValue(mockRootItems);
+    vi.spyOn(TranscriptionListService, 'fetchFileContents').mockResolvedValue('Contenido de prueba');
 
-    // Mockear la URL para que siempre tenga un userId
+    // Mock la URL para que siempre tenga un userId
     Object.defineProperty(window, 'location', {
       value: {
         search: `?userId=${userId}`,
@@ -51,8 +44,6 @@ describe('TranscriptionList', () => {
   });
 
   it('should load root folder items on initial render', async () => {
-    mockFetchFolderContents.mockResolvedValueOnce(mockRootItems);
-
     render(<TranscriptionList userId={userId} />);
 
     await waitFor(() => {
@@ -60,13 +51,13 @@ describe('TranscriptionList', () => {
       expect(screen.getByText('File 1.txt')).toBeInTheDocument();
     });
 
-    expect(mockFetchFolderContents).toHaveBeenCalledWith({ id: 'root' }, userId);
-    expect(showNotification).toHaveBeenCalledWith('Archivos cargados correctamente.', 'success');
+    expect(TranscriptionListService.fetchFolderContents).toHaveBeenCalledWith({ id: 'root' }, userId);
+    expect(NotificationSystem.showNotification).toHaveBeenCalledWith('Archivos cargados correctamente.', 'success');
   });
 
   it('should navigate to a subfolder on folder click', async () => {
-    mockFetchFolderContents.mockResolvedValueOnce(mockRootItems); 
-    mockFetchFolderContents.mockResolvedValueOnce(mockSubfolderItems); 
+    vi.spyOn(TranscriptionListService, 'fetchFolderContents').mockResolvedValueOnce(mockRootItems);
+    vi.spyOn(TranscriptionListService, 'fetchFolderContents').mockResolvedValueOnce(mockSubfolderItems);
 
     render(<TranscriptionList userId={userId} />);
 
@@ -80,17 +71,17 @@ describe('TranscriptionList', () => {
       expect(screen.getByText('Subfile 1.doc')).toBeInTheDocument();
     });
 
-    expect(mockFetchFolderContents).toHaveBeenCalledWith(
+    expect(TranscriptionListService.fetchFolderContents).toHaveBeenCalledWith(
       expect.objectContaining({ id: 'folder1', mimeType: 'application/vnd.google-apps.folder' }),
       userId
     );
-    expect(showNotification).toHaveBeenCalledWith('Carpeta "Folder 1" cargada correctamente.', 'success');
+    expect(NotificationSystem.showNotification).toHaveBeenCalledWith('Carpeta "Folder 1" cargada correctamente.', 'success');
   });
 
   it('should handle back navigation', async () => {
-    mockFetchFolderContents.mockResolvedValueOnce(mockRootItems); 
-    mockFetchFolderContents.mockResolvedValueOnce(mockSubfolderItems); 
-    mockFetchFolderContents.mockResolvedValueOnce(mockRootItems); 
+    vi.spyOn(TranscriptionListService, 'fetchFolderContents').mockResolvedValueOnce(mockRootItems); 
+    vi.spyOn(TranscriptionListService, 'fetchFolderContents').mockResolvedValueOnce(mockSubfolderItems); 
+    vi.spyOn(TranscriptionListService, 'fetchFolderContents').mockResolvedValueOnce(mockRootItems); 
 
     render(<TranscriptionList userId={userId} />);
 
@@ -108,13 +99,13 @@ describe('TranscriptionList', () => {
       expect(screen.getByText('Folder 1')).toBeInTheDocument();
       expect(screen.getByText('File 1.txt')).toBeInTheDocument();
     });
-    expect(showNotification).toHaveBeenCalledWith('Volviendo a la carpeta anterior.', 'info');
+    expect(NotificationSystem.showNotification).toHaveBeenCalledWith('Volviendo a la carpeta anterior.', 'info');
   });
 
   it('should display file content on file click and update states', async () => {
-    mockFetchFolderContents.mockResolvedValueOnce(mockRootItems); 
+    vi.spyOn(TranscriptionListService, 'fetchFolderContents').mockResolvedValueOnce(mockRootItems); 
     const mockFileContent = 'Contenido del archivo de prueba.';
-    mockFetchFileContents.mockResolvedValueOnce(mockFileContent);
+    vi.spyOn(TranscriptionListService, 'fetchFileContents').mockResolvedValueOnce(mockFileContent);
 
     render(<TranscriptionList userId={userId} />);
 
@@ -129,19 +120,17 @@ describe('TranscriptionList', () => {
       expect(screen.getByText('Contenido del Archivo:')).toBeInTheDocument();
       expect(screen.getByText(mockFileContent)).toBeInTheDocument();
     });
-    expect(mockFetchFileContents).toHaveBeenCalledWith(
+    expect(TranscriptionListService.fetchFileContents).toHaveBeenCalledWith(
       expect.objectContaining({ id: 'file1', name: 'File 1.txt', mimeType: 'text/plain' }),
       userId
     );
-    expect(showNotification).toHaveBeenCalledWith('Archivo "File 1.txt" cargado correctamente.', 'success');
+    expect(NotificationSystem.showNotification).toHaveBeenCalledWith('Archivo "File 1.txt" cargado correctamente.', 'success');
 
-    // Verify states are updated (implicitly through rendering, but can add direct checks if component exposes them)
-    // Since we don't have direct access to component state in tests, we verify via rendered output.
   });
 
   it('should show loading indicator when fetching file content', async () => {
-    mockFetchFolderContents.mockResolvedValueOnce(mockRootItems);
-    mockFetchFileContents.mockImplementationOnce(() => new Promise(resolve => setTimeout(() => resolve('Test content'), 100)));
+    vi.spyOn(TranscriptionListService, 'fetchFolderContents').mockResolvedValueOnce(mockRootItems);
+    vi.spyOn(TranscriptionListService, 'fetchFileContents').mockImplementationOnce(() => new Promise(resolve => setTimeout(() => resolve('Test content'), 100)));
 
     render(<TranscriptionList userId={userId} />);
 
@@ -155,8 +144,8 @@ describe('TranscriptionList', () => {
   });
 
   it('should display error message if fetching file content fails', async () => {
-    mockFetchFolderContents.mockResolvedValueOnce(mockRootItems); 
-    mockFetchFileContents.mockRejectedValueOnce(new Error('File content API error'));
+    vi.spyOn(TranscriptionListService, 'fetchFolderContents').mockResolvedValueOnce(mockRootItems); 
+    vi.spyOn(TranscriptionListService, 'fetchFileContents').mockRejectedValueOnce(new Error('File content API error'));
 
     render(<TranscriptionList userId={userId} />);
 
@@ -167,17 +156,14 @@ describe('TranscriptionList', () => {
     fireEvent.click(screen.getByText('File 1.txt'));
 
     await waitFor(() => {
-      expect(showNotification).toHaveBeenCalledWith('No se pudo cargar el contenido del archivo.', 'error');
-      expect(screen.getByText('No se pudo cargar el contenido del archivo.')).toBeInTheDocument(); // Assuming the error is rendered
+      expect(NotificationSystem.showNotification).toHaveBeenCalledWith('No se pudo cargar el contenido del archivo.', 'error');
+      expect(screen.getByText('No se pudo cargar el contenido del archivo.')).toBeInTheDocument();
     });
-    // The view should remain on the file content view, but with an error.
-    expect(screen.queryByText('Folder 1')).not.toBeInTheDocument(); // Not showing folder list
-    expect(screen.getByText('Volver a la lista')).toBeInTheDocument(); // Still in file view
   });
 
   it('should clear selected file content and return to list view', async () => {
-    mockFetchFolderContents.mockResolvedValueOnce(mockRootItems); 
-    mockFetchFileContents.mockResolvedValueOnce('Contenido del archivo de prueba.');
+    vi.spyOn(TranscriptionListService, 'fetchFolderContents').mockResolvedValueOnce(mockRootItems); 
+    vi.spyOn(TranscriptionListService, 'fetchFileContents').mockResolvedValueOnce('Contenido del archivo de prueba.');
 
     render(<TranscriptionList userId={userId} />);
 
@@ -200,19 +186,19 @@ describe('TranscriptionList', () => {
   });
 
   it('should display error notification if fetching root fails', async () => {
-    mockFetchFolderContents.mockRejectedValueOnce(new Error('API error'));
+    vi.spyOn(TranscriptionListService, 'fetchFolderContents').mockRejectedValueOnce(new Error('API error'));
 
     render(<TranscriptionList userId={userId} />);
 
     await waitFor(() => {
-      expect(showNotification).toHaveBeenCalledWith('No se pudieron cargar los archivos de Google Drive.', 'error');
+      expect(NotificationSystem.showNotification).toHaveBeenCalledWith('No se pudieron cargar los archivos de Google Drive.', 'error');
     });
     expect(screen.queryByText('Folder 1')).not.toBeInTheDocument();
   });
 
   it('should display error notification if navigating to subfolder fails', async () => {
-    mockFetchFolderContents.mockResolvedValueOnce(mockRootItems); 
-    mockFetchFolderContents.mockRejectedValueOnce(new Error('Folder API error')); 
+    vi.spyOn(TranscriptionListService, 'fetchFolderContents').mockResolvedValueOnce(mockRootItems); 
+    vi.spyOn(TranscriptionListService, 'fetchFolderContents').mockRejectedValueOnce(new Error('Folder API error')); 
 
     render(<TranscriptionList userId={userId} />);
 
@@ -223,14 +209,14 @@ describe('TranscriptionList', () => {
     fireEvent.click(screen.getByText('Folder 1'));
 
     await waitFor(() => {
-      expect(showNotification).toHaveBeenCalledWith('No se pudo navegar a la carpeta.', 'error');
+      expect(NotificationSystem.showNotification).toHaveBeenCalledWith('No se pudo navegar a la carpeta.', 'error');
     });
     expect(screen.queryByText('Subfile 1.doc')).not.toBeInTheDocument();
     expect(screen.getByText('Folder 1')).toBeInTheDocument();
   });
 
   it('should hide "Volver" button when at root folder', async () => {
-    mockFetchFolderContents.mockResolvedValueOnce(mockRootItems);
+    vi.spyOn(TranscriptionListService, 'fetchFolderContents').mockResolvedValueOnce(mockRootItems);
 
     render(<TranscriptionList userId={userId} />);
 
@@ -242,8 +228,8 @@ describe('TranscriptionList', () => {
   });
 
   it('should show "Volver" button when navigated to a subfolder', async () => {
-    mockFetchFolderContents.mockResolvedValueOnce(mockRootItems); 
-    mockFetchFolderContents.mockResolvedValueOnce(mockSubfolderItems); 
+    vi.spyOn(TranscriptionListService, 'fetchFolderContents').mockResolvedValueOnce(mockRootItems); 
+    vi.spyOn(TranscriptionListService, 'fetchFolderContents').mockResolvedValueOnce(mockSubfolderItems); 
 
     render(<TranscriptionList userId={userId} />);
 

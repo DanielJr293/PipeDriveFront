@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { MoreVertical, Smile, Frown, Meh, Folder, File, BookText, Bold, Key, ArrowLeft} from "lucide-react";
 import { showNotification } from "./NotificationSystem";
 import FileOrFolder from "./FileOrFolder";
+import DocActions from "./DocActions";
 
 /**
  * Obtiene la URL del webhook de NGROK desde las variables de entorno.
@@ -69,6 +70,14 @@ function TranscriptionList({ userId }) {
   const [selectedFileId, setSelectedFileId] = useState(null);
   const [isContentLoaded, setIsContentLoaded] = useState(false);
   const [fileContentError, setFileContentError] = useState(null);
+  const [isDocSelected, setIsDocSelected] = useState(false); // Estado para controlar la visibilidad del componente DocActions basado en si el archivo seleccionado es un documento .doc.
+
+  // MimeTypes específicos que corresponden a archivos de documentos (.doc, .docx, Google Docs).
+  const docMimeTypes = [
+    "application/vnd.google-apps.document",
+    "application/msword",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  ];
 
   /**
    * Obtiene los contenidos de una carpeta específica (o la raíz) de Google Drive.
@@ -114,13 +123,18 @@ function TranscriptionList({ userId }) {
   /**
    * Maneja el clic en un ítem (archivo o carpeta).
    * Si es una carpeta, navega a ella y actualiza el historial de navegación.
-   * Si es un archivo, obtiene su contenido, actualiza los estados de visualización de archivo y gestiona notificaciones.
-   * @param {object} item - El archivo o carpeta en el que se hizo clic.
+   * Si es un archivo, obtiene su contenido, actualiza los estados de visualización de archivo, gestiona notificaciones
+   * y determina si el archivo es un documento para activar o desactivar DocActions.
+   * @param {string} id - El ID del ítem (archivo o carpeta).
+   * @param {string} name - El nombre del ítem.
+   * @param {string} mimeType - El MIME type del ítem.
    */
   const handleItemClick = async (id, name, mimeType) => {
     if (mimeType.includes("folder")) {
       setIsLoading(true);
       setError(null);
+      // Cuando se navega a una carpeta, se asume que no hay un .doc seleccionado.
+      setIsDocSelected(false);
       try {
         const datesArchivos = await fetchFolderContents({ id, name, mimeType }, userId);
         setDriveItems(datesArchivos);
@@ -140,6 +154,10 @@ function TranscriptionList({ userId }) {
       setIsContentLoaded(false);
       setFileContentError(null);
       setIsLoading(true);
+
+      // Determinar si el archivo seleccionado es un documento .doc y actualizar el estado isDocSelected.
+      const isCurrentFileDoc = docMimeTypes.includes(mimeType);
+      setIsDocSelected(isCurrentFileDoc);
 
       try {
         const fileContents = await fetchFileContents({ id, name, mimeType }, userId);
@@ -218,20 +236,15 @@ function TranscriptionList({ userId }) {
   if (selectedFileId && isContentLoaded) {
     return (
       <div className="divFunciones">
-        <div className="primerasFunciones">
-          <button className="divFunc1" onClick={handleCallSummary}>
-            <div className="divFunc1Icono">
-              <BookText size={40}/>
-            </div>
-            <div className="divFunc1Texto">
-              <h1>Resumen De La Llamadas</h1>
-              <h4>Obtener Un Resumen De La Transcripción</h4>
-            </div>
-          </button>
-          <div className="divFunc1">
-            Hola 2
-          </div>
-        </div>
+        {/* Renderiza el componente DocActions condicionalmente si el archivo seleccionado es un .doc. */}
+        {isDocSelected && (
+          <DocActions
+            onSummarizeClick={handleCallSummary} // Usar handleCallSummary para el resumen de la llamada
+            onProposalClick={() => showNotification("Funcionalidad 'Propuesta' en desarrollo.", 'info')}
+            onQuestionsClick={() => showNotification("Funcionalidad 'Preguntas' en desarrollo.", 'info')}
+            onActionsClick={() => showNotification("Funcionalidad 'Acciones' en desarrollo.", 'info')}
+          />
+        )}
         <button
           onClick={() => {
             setSelectedFileId(null);
