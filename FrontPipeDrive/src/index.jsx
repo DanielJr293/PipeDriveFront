@@ -6,7 +6,7 @@ import Informes from "./Informes";
 import "./App.css";
 import { useState } from "react";
 
-export default function Index() {
+export default function Index({ isSidebarOpen, toggleSidebar, userId }) {
   const [activeComponent, setActiveComponent] = useState("drive");
   const [driveKey, setDriveKey] = useState(0); // 👈 clave para forzar remonte
 
@@ -23,21 +23,21 @@ export default function Index() {
       case "notifications":
         return <Notificaciones/>;
       case "drive":
-        return <TranscriptionList key={driveKey}/>; // 👈 key dinámica
+        return <TranscriptionList key={driveKey} userId={userId}/>; // 👈 key dinámica
       case "informs":
         return <Informes/>;
       default:
-        return <TranscriptionList key={driveKey} />;
+        return <TranscriptionList key={driveKey} userId={userId}/>;
     }
   };
 
   return (
     <div className="Index">
-        <div className="BarraIzq">
-            <Sidebar onSelectDates={handleSelect}/>
+        <div className={`BarraIzq ${isSidebarOpen ? 'open' : ''}`}>
+            <Sidebar onSelectDates={handleSelect} isSidebarOpen={isSidebarOpen}/>
         </div>
         <div className="BarraDer">
-            <Header />
+            <Header toggleSidebar={toggleSidebar} isSidebarOpen={isSidebarOpen}/>
             {renderComponent()}
         </div>
     </div>

@@ -2,7 +2,7 @@ import { Bell, Folder, FileText, LogOut } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import "./App.css";
 
-function Sidebar({onSelectDates}) {      
+function Sidebar({onSelectDates, isSidebarOpen}) {      
   const [correo, setCorreo] = useState(null);
   const ejecutado = useRef(false);              // Usando useRef Para Que Solo Se Ejecute Una Vez Las Peticiones.
 
@@ -38,7 +38,7 @@ function Sidebar({onSelectDates}) {
   }, []);
 
   return (
-    <div className="Sidebar">
+    <div className={`Sidebar ${!isSidebarOpen ? 'hidden' : ''}`}>
       {/**
        * Div En Donde Se Coloca Lean Sales, Lo Dejo Por Si Existe Algun Icono.
        */}
@@ -91,16 +91,7 @@ function Sidebar({onSelectDates}) {
       {/**
        * Div En Donde Esta El Botón Para Cerrar Sección.
        */}
-      <div className="divButton">
-        <button>
-          <div className="divImgBtn1">
-            <LogOut/>
-          </div>
-          <div className="divInfBtn1">
-            Cerrar sesión
-          </div>
-        </button>
-      </div>
+      
     </div>
   );
 }

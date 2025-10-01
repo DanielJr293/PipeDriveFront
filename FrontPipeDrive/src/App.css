@@ -1,330 +1,791 @@
-/*
-    Div Principal En Donde Se Almacena Todos Los Componentes
-*/
-.Index{
-    min-height: 100vh;
-    height: auto;
-    width: 95%;
-    margin: 0 auto;
-    border: 1px solid rgba(110, 107, 107, 0.691);
-    border-radius: 30px;
-    display: flex;
+/* Variables CSS - Paleta de colores más profesional */
+:root {
+    --primary-blue: #5B6CFF; /* Azul brillante y moderno */
+    --primary-blue-dark: #4655E0; /* Tono más oscuro para hover */
+    --secondary-gray: #F0F2F5; /* Gris claro para fondos sutiles */
+    --text-primary: #2C3E50; /* Azul oscuro casi negro para texto principal */
+    --text-secondary: #7F8C8D; /* Gris medio para texto secundario/descripciones */
+    --border-light: #DCDDE1; /* Borde más suave */
+    --shadow-light: 0 4px 10px rgba(0, 0, 0, 0.08); /* Sombra más pronunciada pero suave */
+    --shadow-hover: 0 6px 15px rgba(0, 0, 0, 0.15); /* Sombra en hover */
+    --success-green: #2ECC71; /* Verde éxito */
+    --success-green-dark: #27AE60; /* Verde oscuro para hover */
+    --error-red: #E74C3C; /* Rojo error */
+    --info-blue: #3498DB; /* Azul info */
+    --white: #FFFFFF;
 }
 
-/*
-    Div De La Barra Izquierda En Donde Esta La Barra De Navegación, El 
-    Primer Componente De React.
-*/
-.BarraIzq{
-    width: 25%;
+/* Reset y estilos base */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html, body, #root {
+    height: 100%;
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    line-height: 1.6;
+    color: var(--text-primary);
+    background-color: var(--secondary-gray); /* Fondo general de la aplicación */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Estilo para evitar el scroll del contenido principal cuando el sidebar está abierto */
+body.no-scroll {
+    overflow: hidden;
+}
+
+/* Contenedor principal */
+.Index {
+    height: 100%; /* Ahora usa height: 100% para que los hijos flexbox puedan distribuir el espacio */
+    width: 90%; /* Ajustar ancho para un look más moderno */
+    margin: 1.5rem auto; /* Margen superior e inferior para despegarlo del borde */
+    border: none; /* Eliminar borde para un look más limpio */
+    border-radius: 18px; /* Bordes más redondeados */
     display: flex;
-    justify-content: center;
+    overflow: hidden; /* Esto es para el Index en sí, si el contenido interno debe scrollear, debe ser en los hijos */
+    box-shadow: var(--shadow-light); /* Sombra para elevar el contenedor */
+    background-color: var(--white); /* Fondo blanco para el contenedor principal */
+    transition: all 0.3s ease-in-out;
+}
+
+/* Barra Lateral - Estilos para desktop */
+.BarraIzq {
+    width: 280px; /* Ancho fijo para la sidebar en desktop */
+    flex-shrink: 0; /* Evitar que se encoja */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
     align-items: center;
+    padding: 2rem 1.5rem;
+    background-color: var(--white);
+    border-right: 1px solid var(--border-light);
+    transition: all 0.3s ease-in-out;
+    position: relative; /* Asegurar que no se comporte como fixed en desktop */
+    transform: translateX(0); /* Asegurar que siempre esté visible en desktop */
+    z-index: auto; /* Restablecer z-index para desktop */
+    box-shadow: none; /* Eliminar sombra en desktop */
 }
 
-.Sidebar{
+.Sidebar {
     width: 100%;
+    display: flex;
+    flex-direction: column;
     height: 100%;
+    transition: all 0.3s ease-in-out;
 }
 
-.divLogo{
+/* Ocultar el botón de alternar en escritorio */
+.sidebar-toggle-button {
+    display: none;
+}
+
+.divLogo {
     display: flex;
     justify-content: center;
     align-items: center;
-    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
-    font-size: 2em;
-    font-size: clamp(1rem, 5vw, 2rem);
-    color: rgb(80, 71, 229);
-    height: 15%;
+    font-family: 'Roboto', sans-serif;
+    font-size: 2.2rem;
+    color: var(--primary-blue);
+    font-weight: 700;
+    padding: 1.5rem 0;
+    margin-bottom: 1rem; /* Ajustado para mover los botones más arriba */
 }
 
-.divBarra{
-    height: 70%;
+.divBarra {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start; /* Alinea el contenido al inicio */
+    align-items: center;
+    width: 100%;
+    padding-top: 1.5rem; /* Pequeño padding superior */
 }
 
-.divUser{
-    height: 15%;
+.divUser {
     display: flex;
     justify-content: center;
     align-items: center;
-    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
-    color: rgb(64, 73, 89);
-    font-size: clamp(0.5rem, 5vw, 1rem);
-    font-weight: bold;
-}
-
-.divButtons{
-    height: 85%;
-}
-
-.divBtn1{
-    height: 12%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.divBtn1 button{
-    width: 70%;
-    height: 80%;
-    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
-    font-size: 1em;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: rgba(164, 162, 162, 0.104);
-    border: none;
-    border-radius: 20px;
-}
-
-.divImgBtn1{
-    width: 30%;
-    height: 100%;
-    display: flex;
-    justify-content: right;
-    align-items: center;
-}
-
-.divInfBtn1{
-    width: 70%;
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
-    font-size: 1.2em;
-    color: rgb(128, 134, 147);
-}
-
-.divButton{
-    height: 15%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.divButton button{
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 50%;
-    height: 35%;
-    background-color: rgba(164, 162, 162, 0.104);
-    border: none;
-    border-radius: 20px;
-}
-
-/*
-    Barra Derecha De La Interfaz.
-*/
-
-.BarraDer{
-    width: 75%;
-    background-color: aliceblue;
-    min-height: 8rem;
-}
-
-.divHeader{
-    display: flex;
-    height: 20%;
-}
-
-.divTranscrip{
-    width: 40%;
-    font-size: 1.5rem;
-    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.divButtons1{
-    width: 60%;
-    display: flex;
-}
-
-.divSearch1{
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 60%;
-}
-
-.divSearchInput{
-    width: 60%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.divSearchInput input{
-    height: 10%;
-    width: 80%;
-    border-radius: 20px;
-    padding: 1%;
+    font-family: 'Roboto', sans-serif;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    font-weight: 500;
     text-align: center;
+    margin-bottom: 0.5rem; /* Reducido para acercar los botones */
+    padding: 0.5rem 0;
+    border-top: 1px solid var(--border-light);
+    width: 100%;
+}
+
+.divButtons {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    margin-top: 0.5rem; /* Añadir un margen superior para separar de divUser */
+}
+
+.divBtn1 {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.divBtn1 button {
+    width: 100%;
+    padding: 0.9rem 1.2rem;
+    font-family: 'Roboto', sans-serif;
+    font-size: 1rem;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    background-color: transparent;
     border: none;
+    border-radius: 10px;
+    color: var(--text-primary);
+    transition: all 0.2s ease-in-out;
+    cursor: pointer;
+    gap: 0.8rem;
 }
 
-.divSearch{
-    width: 40%;
-    height: 100%;
+.divBtn1 button:hover {
+    background-color: var(--secondary-gray);
+    color: var(--primary-blue);
+    box-shadow: var(--shadow-light);
+    transform: translateY(-0.0625rem);
+}
+
+.divBtn1 button:active {
+    transform: translateY(0.0625rem);
+}
+
+.divImgBtn1 {
+    width: 30px; /* Tamaño fijo para iconos */
+    height: 30px;
     display: flex;
     justify-content: center;
     align-items: center;
+    color: var(--text-secondary);
 }
 
-.divSearch button{
+.divBtn1 button:hover .divImgBtn1 {
+    color: var(--primary-blue);
+}
+
+.divInfBtn1 {
+    flex-grow: 1; /* Ocupar el resto del espacio */
     display: flex;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
-    width: 80%;
-    height: 20%;
-    background-color: rgba(164, 162, 162, 0.988);
+    font-family: 'Roboto', sans-serif;
+    font-size: 1rem;
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+/* Contenido Principal Derecho */
+.BarraDer {
+    flex-grow: 1;
+    display: flex; /* Convertir en flex container */
+    flex-direction: column;
+    height: 100%; /* Ocupar toda la altura disponible */
+    background-color: var(--secondary-gray);
+    padding: 1.5rem;
+    transition: all 0.3s ease-in-out;
+}
+
+.divHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border-light);
+    margin-bottom: 1.5rem;
+    background-color: var(--white);
+    border-radius: 12px;
+    box-shadow: var(--shadow-light);
+    flex-shrink: 0; /* Evitar que se encoja */
+}
+
+.divTranscrip {
+    font-size: 2.2rem;
+    font-family: 'Roboto', sans-serif;
+    font-weight: 700;
+    color: var(--primary-blue);
+    flex-grow: 1; /* Permite que ocupe espacio y empuje el botón */
+    text-align: center; /* Centrar el texto por defecto */
+}
+
+.divButtons1 {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    flex-shrink: 0; /* Evitar que se encoja */
+}
+
+.divHisto1 button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.8rem 1.5rem;
+    border-radius: 8px;
     border: none;
-    border-radius: 20px;
+    background-color: var(--primary-blue);
+    color: var(--white);
+    font-family: 'Roboto', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    box-shadow: var(--shadow-light);
 }
 
-.divHisto1{
-    width: 40%;
+.divHisto1 button:hover {
+    background-color: var(--primary-blue-dark);
+    box-shadow: var(--shadow-hover);
+    transform: translateY(-0.0625rem);
+}
+
+/* Lista de Archivos/Carpetas */
+.divTranscriptionList {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem;
+    gap: 0.8rem;
+    flex-grow: 1; /* Esto es clave para que ocupe el espacio restante y pueda scrollear */
+    overflow-y: auto; /* Habilitar scroll vertical */
+    overflow-x: hidden;
+    background-color: var(--secondary-gray);
+    /* min-height: 0; */ /* Asegurarse de que no tenga una altura mínima que impida flex-grow */
+}
+
+.btnArchivo {
+    border: 1px solid var(--border-light);
+    border-radius: 12px;
+    display: flex;
+    width: 90%;
+    max-width: 45rem; /* Aumentar ligeramente el ancho máximo */
+    padding: 1rem 1.5rem;
+    background-color: var(--white);
+    margin: 0.4rem auto;
+    box-shadow: var(--shadow-light);
+    transition: all 0.2s ease-in-out;
+    cursor: pointer;
+}
+
+.btnArchivo:hover {
+    background-color: var(--secondary-gray);
+    box-shadow: var(--shadow-hover);
+    transform: translateY(-0.125rem);
+}
+
+.btnArchivo:focus {
+    outline: none;
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 0.1875rem rgba(91, 108, 255, 0.4);
+}
+
+.divBtnArch {
+    width: 35px; /* Tamaño fijo para iconos */
+    height: 35px;
     display: flex;
     justify-content: center;
     align-items: center;
+    color: var(--primary-blue);
+    flex-shrink: 0;
+    margin-right: 1rem;
 }
 
-.divHisto1 button{
+.divBtnArchText {
+    flex-grow: 1;
     display: flex;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
-    width: 50%;
-    height: 25%;
-    background-color: rgba(164, 162, 162, 0.104);
-    border: none;
-    border-radius: 20px;
+    font-family: 'Roboto', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-.btnArchivo{
-    border: 1px solid gray;
-    border-radius: 20px;
-    display: flex;
-    width: 70%;
-    min-height: 3rem;
-    background-color: rgba(28, 31, 32, 0.139); 
-    margin: 5px;
-}
-
-.divBtnArch{
-    width: 20%;
-    min-height: 4rem;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.divBtnArchText{
-    width: 80%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
-    font-size: clamp(0.5rem, 5vw, 1.2rem);
-    font-weight: bold;
-}
-
-.divFunciones{
+/* Área de Funciones (Resumen de llamadas) */
+.divFunciones {
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    min-height: 6rem;
+    padding: 1.5rem;
+    gap: 1.5rem;
+    background-color: var(--secondary-gray);
+    flex-shrink: 0; /* Evitar que se encoja */
 }
 
-.divFunciones .buttonReturn{
-    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
-    font-size: clamp(1rem, 5vw, 1.5rem);
-    font-weight: bold;
-    margin-top: 5%;
-    border: none;
-    padding: 12px;
-    border-radius: 15px;
-    background-color: rgb(73, 185, 73);
-    color: white;
-}
-
-.primerasFunciones{
+.primerasFunciones {
     display: flex;
-    width: 95%;
-    display: flex;
+    width: 90%;
+    max-width: 900px;
     justify-content: center;
     align-items: stretch;
-    gap: 3%
+    gap: 1.5rem;
 }
 
-.divFunc1{
-    background-color: #cfd8df;
-    margin-top: 3%;
-    border: 1px solid #e6e7eb;
-    border-radius: 20px;
-    width: 45%;
-    padding: 2%;
+.divFunc1 {
+    background-color: var(--white);
+    border: 1px solid var(--border-light);
+    border-radius: 15px;
+    width: 48%;
+    padding: 2rem;
     display: flex;
     flex-direction: column;
-    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+    font-family: 'Roboto', sans-serif;
+    box-shadow: var(--shadow-light);
+    transition: all 0.2s ease-in-out;
+    cursor: pointer;
 }
 
-.divFunc1Icono{
+.divFunc1:hover {
+    box-shadow: var(--shadow-hover);
+    transform: translateY(-0.0625rem);
+}
+
+.divFunc1Icono {
+    color: var(--primary-blue);
+    font-size: 2.5rem;
+    margin-bottom: 1.2rem;
 }
 
 .divFunc1Texto h1 {
-    font-size: clamp(1rem, 5vw, 1.7rem);
-    padding-top: 4%;
-    padding-bottom: 4%;
-    display: block;
-    width: 100%;
-    margin: 0;
+    font-size: 1.4rem;
+    color: var(--text-primary);
+    margin-bottom: 0.6rem;
+    font-weight: 600;
 }
 
 .divFunc1Texto h4 {
-    font-size: clamp(1rem, 5vw, 1rem);
-    padding-top: 3%;
-    padding-bottom: 3%;
-    display: block;
-    width: 100%;
-    margin: 0; /* quita espacios extra */
+    font-size: 0.95rem;
+    color: var(--text-secondary);
 }
 
-/*
-    --------------------------------Media Para Que Sea Responsivo--------------------------------
-*/
-@media (max-width: 1280px) {
+.divFunciones .buttonReturn {
+    font-family: 'Roboto', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-top: 2.5rem;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 8px;
+    background-color: var(--success-green);
+    color: var(--white);
+    transition: all 0.2s ease-in-out;
+    cursor: pointer;
+    box-shadow: var(--shadow-light);
+}
+
+.divFunciones .buttonReturn:hover {
+    background-color: var(--success-green-dark);
+    box-shadow: var(--shadow-hover);
+    transform: translateY(-0.0625rem);
+}
+
+/* Botón Volver a la carpeta anterior */
+.back-button-style {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.8rem 1.6rem;
+    border-radius: 8px;
+    border: none;
+    background-color: var(--primary-blue);
+    color: var(--white);
+    font-family: 'Roboto', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    margin-bottom: 1.5rem;
+    box-shadow: var(--shadow-light);
+}
+
+.back-button-style:hover {
+    background-color: var(--primary-blue-dark);
+    box-shadow: var(--shadow-hover);
+    transform: translateY(-0.0625rem);
+}
+
+/* Mensajes de carga */
+.loading-message {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+    color: var(--text-secondary);
+    font-family: 'Roboto', sans-serif;
+    font-size: 1.2rem;
+    gap: 1rem;
+}
+
+.spinner {
+    border: 0.25rem solid rgba(0, 0, 0, 0.1);
+    border-top: 0.25rem solid var(--primary-blue);
+    border-radius: 50%;
+    width: 2.5rem;
+    height: 2.5rem;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Backdrop para el sidebar en móvil */
+.sidebar-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 999; /* Por debajo del sidebar, pero por encima del contenido */
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+}
+
+.sidebar-backdrop.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Media Queries */
+
+/* Para tabletas y pantallas más pequeñas (hasta 768px) */
+@media (max-width: 768px) {
+    .Index {
+        flex-direction: column;
+        width: 100%;
+        margin: 0;
+        border-radius: 0;
+        box-shadow: none;
+        padding: 0;
+        position: relative; /* Necesario para que el contenido se ajuste correctamente */
+        height: 100vh; /* Asegurar altura completa en móviles */
+    }
+
+    .BarraIzq {
+        position: fixed; /* Barra lateral como overlay */
+        top: 0;
+        left: 0;
+        height: 100vh;
+        width: 280px; /* Ancho fijo para el sidebar en móvil */
+        transform: translateX(-100%); /* Ocultar sidebar por defecto */
+        border-right: none;
+        z-index: 1000; /* Asegurarse de que esté por encima del contenido */
+        box-shadow: var(--shadow-light); /* Sombra para el sidebar al abrirse */
+    }
+
+    .BarraIzq.open {
+        transform: translateX(0); /* Mostrar sidebar */
+    }
+
+    /* En móviles, BarraIzq.open ya maneja la visibilidad, no necesitamos Index.sidebar-hidden */
+    /* .Index.sidebar-hidden .BarraIzq { display: flex; } */
+
+    .BarraDer {
+        width: 100%;
+        padding: 1rem;
+        height: 100%; /* Asegurar que ocupe la altura completa disponible */
+    }
+
+    .divLogo {
+        font-size: 2rem;
+        padding: 1rem 0;
+        margin-bottom: 1rem; /* Ajustado */
+    }
+
+    .divUser {
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem; /* Ajustado */
+    }
+
+    .divButtons {
+        gap: 0.5rem;
+        margin-top: 0.5rem; /* Ajustado */
+    }
+
+    .divBtn1 button {
+        width: 100%;
+        padding: 0.7rem 1rem;
+        font-size: 0.95rem;
+    }
+
+    .divImgBtn1 {
+        width: 25px;
+        height: 25px;
+        margin-right: 0.8rem;
+    }
+
+    .divInfBtn1 {
+        font-size: 0.95rem;
+    }
+
+    .divHeader {
+        flex-direction: row; /* Volver a fila para botón y título */
+        justify-content: flex-start; /* Alinear elementos a la izquierda */
+        align-items: center;
+        padding: 0.8rem;
+        margin-bottom: 1rem;
+        border-radius: 10px;
+    }
+
+    .divTranscrip {
+        width: auto; /* Ajustar ancho automáticamente */
+        text-align: left; /* Alinear título a la izquierda */
+        font-size: 2rem;
+        margin-bottom: 0;
+        flex-grow: 1; /* Permite que ocupe espacio */
+        order: 0; /* Orden normal */
+        margin-left: 1rem; /* Espacio entre botón y título */
+    }
+
+    .divButtons1 {
+        width: auto;
+        justify-content: flex-end;
+        order: 0; /* Orden normal */
+    }
+
+    .sidebar-toggle-button {
+        display: flex; /* Mostrar el botón en mobile */
+        order: -1; /* Asegurar que el botón esté al principio */
+        margin-right: 0; /* Eliminar margen derecho cuando se apila */
+        margin-bottom: 0; /* Eliminar margen inferior */
+    }
+
+    .divHisto1 button {
+        width: auto; /* Ajustar ancho automáticamente */
+        padding: 0.7rem 1.2rem;
+        font-size: 1rem;
+    }
+
+    .divTranscriptionList {
+        padding: 0.5rem;
+        gap: 0.6rem;
+        height: calc(100% - 150px); /* Calcular altura disponible para el scroll */
+    }
+
+    .btnArchivo {
+        width: 100%;
+        max-width: none;
+        padding: 0.7rem 1rem;
+        margin: 0.3rem auto;
+    }
+
+    .divBtnArch {
+        font-size: 1.2rem;
+        width: 30px;
+        height: 30px;
+        margin-right: 0.8rem;
+    }
+
+    .divBtnArchText {
+        font-size: 0.95rem;
+    }
+
+    .divFunciones {
+        padding: 0.8rem;
+        gap: 1rem;
+    }
+
+    .primerasFunciones {
+        flex-direction: column;
+        gap: 1rem;
+        width: 100%;
+    }
+
+    .divFunc1 {
+        width: 100%;
+        padding: 1.5rem;
+        margin-top: 0;
+    }
+
+    .divFunc1Icono {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+    }
+
+    .divFunc1Texto h1 {
+        font-size: 1.1rem;
+    }
+
+    .divFunc1Texto h4 {
+        font-size: 0.85rem;
+    }
+
+    .divFunciones .buttonReturn {
+        width: 90%;
+        font-size: 1rem;
+        margin-top: 1.5rem;
+        padding: 10px 20px;
+    }
+
+    .back-button-style {
+        width: 95%;
+        font-size: 1rem;
+        padding: 0.7rem 1.2rem;
+        margin-bottom: 1rem;
+    }
+
+    .loading-message {
+        font-size: 1.1rem;
+        gap: 0.8rem;
+    }
+}
+
+/* Para móviles pequeños (hasta 480px) */
+@media (max-width: 480px) {
     .divLogo{
-        font-size: clamp(1rem, 5vw, 1.5rem);
+        font-size: 1.8rem;
+        padding: 0.5rem 0;
+        margin-bottom: 0.8rem; /* Ajustado */
     }
 
     .divUser{
-        font-size: clamp(0.5rem, 5vw, 0.8rem);
+        font-size: 0.8rem;
+        margin-bottom: 0.5rem; /* Ajustado */
     }
 
     .divBtn1 button{
-        width: 80%;
+        padding: 0.6rem 0.8rem;
+        font-size: 0.85rem;
+        gap: 0.6rem;
     }
 
-    .divButton button{
-        width: 80%;
+    .divImgBtn1 {
+        width: 22px;
+        height: 22px;
+        margin-right: 0.6rem;
+    }
+
+    .divInfBtn1 {
+        font-size: 0.85rem;
+    }
+
+    .divHeader {
+        padding: 0.6rem;
+        margin-bottom: 0.6rem;
     }
 
     .divTranscrip{
-        font-size: clamp(0.5rem, 5vw, 1.2rem);
+        font-size: 1.6rem;
+        margin-bottom: 0.6rem;
     }
 
-    .divSearch button{
-        width: 100%;
-        height: 20%;
+    .sidebar-toggle-button {
+        padding: 0.4rem;
+        margin-right: 0.6rem;
     }
 
     .divHisto1 button{
-        width: 80%;
-        height: 20%;
+        padding: 0.6rem 1rem;
+        font-size: 0.9rem;
     }
+
+    .divTranscriptionList {
+        padding: 0.2rem;
+        gap: 0.4rem;
+        height: calc(100% - 130px); /* Ajustar altura para móvil pequeño */
+    }
+
+    .btnArchivo {
+        padding: 0.5rem 0.8rem;
+    }
+
+    .divBtnArch{
+        font-size: 1rem;
+        width: 25px;
+        height: 25px;
+        margin-right: 0.6rem;
+    }
+
+    .divBtnArchText{
+        font-size: 0.8rem;
+    }
+
+    .divFunciones {
+        padding: 0.5rem;
+        gap: 0.8rem;
+    }
+
+    .primerasFunciones {
+        gap: 0.8rem;
+    }
+
+    .divFunc1 {
+        padding: 1rem;
+    }
+
+    .divFunc1Icono {
+        font-size: 1.8rem;
+        margin-bottom: 0.8rem;
+    }
+
+    .divFunc1Texto h1 {
+        font-size: 1rem;
+    }
+
+    .divFunc1Texto h4 {
+        font-size: 0.75rem;
+    }
+
+    .divFunciones .buttonReturn{
+        font-size: 0.9rem;
+        margin-top: 1rem;
+        padding: 8px 15px;
+    }
+
+    .back-button-style {
+        font-size: 0.9rem;
+        padding: 0.5rem 0.8rem;
+        margin-bottom: 0.6rem;
+    }
+}
+
+.file-content-display {
+  margin-top: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.file-content-display h2 {
+  font-size: 1.5em;
+  color: #2c3e50;
+  margin-bottom: 15px;
+  border-left: 5px solid #4CAF50;
+  padding-left: 10px;
+}
+
+.file-content-display pre {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  max-height: 450px; /* Adjust as needed */
+  overflow-y: auto;
+  background-color: #f9f9f9;
+  padding: 20px;
+  border-radius: 10px;
+  border: 1px solid #e0e0e0;
+  font-family: 'Roboto Mono', monospace;
+  color: #333;
+  line-height: 1.6;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease-in-out;
 }

@@ -1,34 +1,23 @@
 /**
  * Componente De La Parte Superior En Donde Esta El Boton De Buscar y El Boton De Historial.
  */
-import { Search, History } from "lucide-react";
+import { History, Menu } from "lucide-react";
 
 function mensajes(){
   alert("Hola Mundo");
 }
 
-export default function Header() {
+export default function Header({ toggleSidebar, isSidebarOpen }) {
   return (
     <div className="divHeader">
+      <button onClick={toggleSidebar} className="sidebar-toggle-button">
+        <Menu size={24} />
+      </button>
       <div className="divTranscrip">
         <h1>Transcripciones</h1>
       </div>
       <div className="divButtons1">
-        <div className="divSearch1">
-          <div className="divSearchInput">
-            <input type="text" placeholder="Buscar"/>
-          </div>
-          <div className="divSearch">
-            <button>
-              <div className="divImgBtn1">
-                <Search/>
-              </div>
-              <div className="divInfBtn1">
-                Buscar
-              </div>
-            </button>
-          </div>
-        </div>
+        
         <div className="divHisto1">
           <button>
             <div className="divImgBtn1">

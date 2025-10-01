@@ -2,190 +2,224 @@
  * Importación De Las Librerias Necesarias.
  */
 import { useEffect, useRef, useState } from "react";
-import { MoreVertical, Smile, Frown, Meh, Folder, File, BookText, Bold, Key} from "lucide-react";
+import { MoreVertical, Smile, Frown, Meh, Folder, File, BookText, Bold, Key, ArrowLeft} from "lucide-react";
+import { showNotification } from "./NotificationSystem";
+import FileOrFolder from "./FileOrFolder";
 
 /**
- * Creación De Nuestra Función Asyncrona, Para Poder Consultar Los Archivos Que Contiene Una Carpeta, De Google
- * Drive.
- * @param {"id": "IdDelFolder","mimeType": "TipoDeArchivo", "name": "NombreDeLaCarpeta"} 
- * @returns Todos Los Archivos Que Contenga La Carpeta.
+ * Obtiene la URL del webhook de NGROK desde las variables de entorno.
  */
-async function archivosFolders(item){
-  const WEBHOOK = import.meta.env.VITE_URL_NGROK;                 // Importación De Nuestra Variable De Entorno.
-  const params = new URLSearchParams(window.location.search);     // Obteniendo Los Parametros De La URL.
-  const id = params.get("userId");                                // Obteniendo El UserID Del Usuario.
-  /**
-   * Realizando Nuestra Petición A Nuestra API, Para Poder Obtener Esos Datos.
-   */
+const getWebhookNgrok = () => import.meta.env.VITE_URL_NGROK;
+
+/**
+ * Obtiene la URL del webhook del agente desde las variables de entorno.
+ */
+const getWebhookAgent = () => import.meta.env.VITE_URL_AGENT;
+
+/**
+ * Consulta los archivos que contiene una carpeta de Google Drive.
+ * @param {object} item - Objeto con id, mimeType y name de la carpeta.
+ * @param {string} userId - El ID del usuario actual.
+ * @returns {Array} Una lista de archivos y carpetas dentro de la carpeta especificada.
+ */
+export async function fetchFolderContents(item, userId){
+  const WEBHOOK = getWebhookNgrok();
+  
   const resp = await fetch(`${WEBHOOK}/DriveFolderArch`, {  
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ userId: id, folderId: item.id }),    // Enviamos Nuestro UserId y El Id Del Folder.
+    body: JSON.stringify({ userId: userId, folderId: item.id }),
   });
-  const data = await resp.json();                               // Obteniedo La Respuesta De La Promesa.
-  const archivos = data.GoogleDrive.files;                      // Guardando En Una Variable Lo Que Nos Importa, Nuestros Objetos
-  return archivos;                                              // Retornando Los Datos, Los Archivos Del Folder.
+  const data = await resp.json();
+  const archivos = data.GoogleDrive.files;
+  return archivos;
 }
 
 /**
- * Realizando La Petición A Nuestra API, Para Ver El Contendio Del Archivo.
- * @param {"id": idDelArchivo", "mimeType": "TipoDeArhivo", "name": "NombreDelArchivo"} item 
- * @returns El Contenido Del Archivo.
+ * Ve el contenido de un archivo.
+ * @param {object} item - Objeto con id, mimeType y name del archivo.
+ * @param {string} userId - El ID del usuario actual.
+ * @returns {string} El contenido del archivo.
  */
-async function contenidoArch(item) {
-  const WEBHOOK = import.meta.env.VITE_URL_NGROK;               // Importación De Nuestra Variable De Entorno.
-  const params = new URLSearchParams(window.location.search);   // Obteniendo Los Parametros De La URL.
-  const id = params.get("userId");                              // Obteniendo El UserID Del Usuario.
-  /**
-   * Realizando Nuestra Petición A Nuestra API, Para Poder Obtener Esos Datos.
-   */
+export async function fetchFileContents(item, userId) {
+  const WEBHOOK = getWebhookNgrok();
+  
   const resp = await fetch(`${WEBHOOK}/DriveInfoArch`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ userId: id, fieldId: item.id }),     // Enviamos Nuestro UserId y El Id Del Folder.
+    body: JSON.stringify({ userId: userId, fieldId: item.id }),
   });
-  const data = await resp.json();                               // Obteniedo La Respuesta De La Promesa.
-  const Contenido = data.GoogleDrive;                           // Guardando En Una Variable Lo Que Nos Importa, Nuestros Objetos
-  return Contenido;                                             // Retornando Los Datos, Los Archivos Del Folder.
+  const data = await resp.json();
+  const Contenido = data.GoogleDrive;
+  //console.log(Contenido); // TODO: Eliminar console.log en producción.
+  return Contenido;
 }
 
 /**
- * Creación De Nuestro Componente, Para Listear Nuestros Archivos.
+ * Componente principal que gestiona la visualización y navegación de archivos y carpetas de Google Drive.
+ * Permite la navegación hacia adelante y hacia atrás, la selección de archivos y la interacción con un sistema de notificaciones.
  */
-function FileOrFolder({ item, setItems, setSelectedFile }) {
-  const isFolder = item.mimeType.includes("folder");        // Variable Para Saber Si Un Archivo Es Una Carpeta.
+function TranscriptionList({ userId }) {
+  const [driveItems, setDriveItems] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [currentFolderId, setCurrentFolderId] = useState("root");
+  const [folderHistory, setFolderHistory] = useState(["root"]);
+  const [selectedFileContent, setSelectedFileContent] = useState(null);
+  const [selectedFileId, setSelectedFileId] = useState(null);
+  const [isContentLoaded, setIsContentLoaded] = useState(false);
+  const [fileContentError, setFileContentError] = useState(null);
 
   /**
-   * Creando Una Función En Para El Button, Para Saber Si Es Un Archivo o Una Carpeta.
+   * Obtiene los contenidos de una carpeta específica (o la raíz) de Google Drive.
+   * Actualiza el estado `driveItems` y gestiona los estados de carga y error, mostrando notificaciones.
+   * @param {string} folderId - El ID de la carpeta a la que navegar. Usa "root" para la carpeta raíz.
    */
-  const handleClick = async () => {
-    /**
-     * De Ser True, Es Que Es Una Carpeta.
-     */
-    if (isFolder) {
-      const datesArchivos = await archivosFolders(item);    // Obteniedo Los Datos Que Contiene Nuestra Carpeta.
-      setItems(datesArchivos);                              // Colocando Un Nuevo Valor A items Para Volver A Renderizar.
-    } 
-    /**
-     * De No Ser Una Carpeta, Sera Un Archivo.
-     */
-    else {
-      const contArch = await contenidoArch(item);           // Obteniendo Lo Que Contiene El Archivo.
-      /**
-       * Usando La Función Para Actualizar El Estado De Nuestra Variable De selectedFile Que Es Del Componente
-       * TranscriptionList.
-       * Haciendo Uso De spread operator Para Poder Devolver El Mismo Objeto Con Uno Extra,
-       * Esto Desglosa El Archivo y Anexa Contenido: "Datos".
-       */
-      setSelectedFile({ ...item, Contenido: contArch});
-    }
-  };
+  const fetchDriveItems = async (folderId) => {
+    setIsLoading(true);
+    setError(null);
+    const WEBHOOK = getWebhookNgrok();
+    
+    try {
+      let url = `${WEBHOOK}/DriveRoot`;
+      let body = { userId: userId };
 
-  /**
-   * Retornando Nuestros Datos Para Poder Seleccionar Seleccionar Un Archivo o Carpeta.
-   */
-  return (
-    /**
-     * Colocando La Función A Nuestro Objeto.
-     */
-    <button className="btnArchivo" onClick={handleClick}>
-      <div className="divBtnArch">
-        {
-          /**
-           * Dependiendo Si Es Folder o No Colocara Un Icono Diferente.
-           */
-        }
-        {isFolder ? <Folder size={28} /> : <File size={28} />}
-      </div>
-      <div className="divBtnArchText">{item.name}</div>
-    </button>
-  );
-}
+      if (folderId !== "root") {
+        url = `${WEBHOOK}/DriveFolderArch`;
+        body = { userId: userId, folderId: folderId };
+      }
 
-/**
- * 
- * Creación De Nuestro Componente, Que Retorna Lo Que Se Muestra.
- */
-function TranscriptionList() {
-  const ejecutado = useRef(false);                          // Variable Para Que Solo Se Ejecute Una Vez Nuestra Petición.
-  const [items, setItems] = useState([]);                   // Variable Para Los Datos Que Retorna Nuestra API, Que Son Los Archivos De Google Drive.
-  /**
-   * Variable Para Poder Colocar o No Los Botones De Las Funciones Para El Documento, 
-   * Solo Se Colocan Si El item Es Un Documento, Esto Se Define Desde FileOrDolder.
-   */
-  const [selectedFile, setSelectedFile] = useState(null);
-
-
-  /**
-   * Función Para Obtener Los Datos De La Raiz De Google Drive "/".
-   */
-  const fetchFolders = async () => {
-    // Variable Para Que Solo Se Ejecute Una Vez.
-    if (!ejecutado.current) {
-      const WEBHOOK = import.meta.env.VITE_URL_NGROK;               // Cargando Una Variable De Entorno.
-      const params = new URLSearchParams(window.location.search);   // Obteniendo Los Datos Enviados Desde La URL.
-      const id = params.get("userId");                              // Obteniendo El ID Del Usuario.
-
-      ejecutado.current = true;                                     // Cambiando Nuestra Variable A True.
-
-      /**
-       * Realizando La Petición A La API, Para Poder Obtener Los Archivos De La
-       * Raiz De Nuestro Google Drive "/"
-       */
-      const peti = await fetch(`${WEBHOOK}/DriveRoot`, {
+      const peti = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: id }),                     // Enviando Solo Nuestros UserID.
+        body: JSON.stringify(body),
       });
-      const resp = await peti.json();                             // Obteniendo La Respuesta o Promesa De La Petición
-      const dates = resp.GoogleDrive.files;                       // Guardando En Una Variable El Objeto.
-      setItems(dates);                                            // Actualizando El Item Para Volver A Renderizar.
+
+      if (!peti.ok) {
+        throw new Error(`HTTP error! status: ${peti.status}`);
+      }
+      const resp = await peti.json();
+      const items = resp.GoogleDrive.files;
+      setDriveItems(items);
+      showNotification("Archivos cargados correctamente.", 'success');
+    } catch (err) {
+      console.error("Error al obtener los archivos de Drive:", err);
+      setError("No se pudieron cargar los archivos de Google Drive.");
+      showNotification("No se pudieron cargar los archivos de Google Drive.", 'error');
+    } finally {
+      setIsLoading(false);
     }
   };
 
   /**
-   * Haciendo uso De useEffect Para Que La Función Solo Funcione Al Cargar El Componente o La URL.
+   * Maneja el clic en un ítem (archivo o carpeta).
+   * Si es una carpeta, navega a ella y actualiza el historial de navegación.
+   * Si es un archivo, obtiene su contenido, actualiza los estados de visualización de archivo y gestiona notificaciones.
+   * @param {object} item - El archivo o carpeta en el que se hizo clic.
    */
-  useEffect(() => {
-    fetchFolders();     // Haciendo Uso De Nuestra Función.
-  }, []);
+  const handleItemClick = async (id, name, mimeType) => {
+    if (mimeType.includes("folder")) {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const datesArchivos = await fetchFolderContents({ id, name, mimeType }, userId);
+        setDriveItems(datesArchivos);
+        setCurrentFolderId(id);
+        setFolderHistory((prevStack) => [...prevStack, id]);
+        showNotification(`Carpeta "${name}" cargada correctamente.`, 'success');
+      } catch (err) {
+        console.error("Error al navegar a la carpeta:", err);
+        setError("No se pudo navegar a la carpeta.");
+        showNotification("No se pudo navegar a la carpeta.", 'error');
+      } finally {
+        setIsLoading(false);
+      }
+    } else {
+      // This is a file, handle file content view
+      setSelectedFileId(id);
+      setIsContentLoaded(false);
+      setFileContentError(null);
+      setIsLoading(true);
+
+      try {
+        const fileContents = await fetchFileContents({ id, name, mimeType }, userId);
+        setSelectedFileContent(fileContents);
+        setIsContentLoaded(true);
+        showNotification(`Archivo "${name}" cargado correctamente.`, 'success');
+      } catch (err) {
+        console.error("Error al obtener el contenido del archivo:", err);
+        setFileContentError("No se pudo cargar el contenido del archivo.");
+        showNotification("No se pudo cargar el contenido del archivo.", 'error');
+      } finally {
+        setIsLoading(false);
+      }
+    }
+  };
 
   /**
-   * Verificando Que La Variable Ya No Sea Nulo, Para Poder Usarla y Colocar Las Funciones (Botones). 
-   * 
-   * <h2>Archivo seleccionado: {selectedFile.name}</h2>
-        <p>{selectedFile.Contenido}</p>
+   * Maneja el clic en el botón "Volver a la carpeta anterior".
+   * Elimina la última carpeta del historial de navegación y carga el contenido de la carpeta anterior.
+   * Si ya se está en la raíz, muestra una notificación informativa.
+   */
+  const handleBackClick = async () => {
+    if (folderHistory.length > 1) {
+      const newStack = folderHistory.slice(0, -1);
+      const previousFolderId = newStack[newStack.length - 1];
+      setFolderHistory(newStack);
+      setCurrentFolderId(previousFolderId);
+      await fetchDriveItems(previousFolderId);
+      showNotification("Volviendo a la carpeta anterior.", 'info');
+    } else {
+      showNotification("Ya estás en la raíz de Google Drive.", 'info');
+    }
+  };
 
-        {/* Ejemplo: abrir en visor de Google Docs }
+  /**
+   * Efecto que se ejecuta al montar el componente o cuando `currentFolderId` cambia.
+   * Realiza la carga inicial de los ítems de Drive si no se ha manejado ya.
+   */
+  useEffect(() => {
+    if (userId) {
+      fetchDriveItems(currentFolderId);
+    }
+  }, [currentFolderId, userId]);
 
-        <button
-          onClick={() => setSelectedFile(null)}
-          style={{ marginTop: "10px" }}
-        >
-          Volver a la lista
-        </button>
-   * */  
-
-  async function ResumenLlamada(dates) {
-    console.log("Datos", dates);
-    const params = new URLSearchParams(window.location.search);   // Obteniendo Los Parametros De La URL.
-    const idDealEnv = params.get("idDeal");
-    const id = params.get("userId"); 
-    const WEBHOOK = import.meta.env.VITE_URL_AGENT; 
+  /**
+   * Maneja el resumen de una llamada a partir del contenido de un archivo seleccionado.
+   * Envía el ID y el contenido del archivo a una API de agente para su procesamiento.
+   * Muestra notificaciones de advertencia si no hay un archivo seleccionado.
+   */
+  async function handleCallSummary() {
+    if (!selectedFileContent || !selectedFileId) {
+      showNotification("No hay archivo seleccionado para resumir.", 'warning');
+      return;
+    }
+    console.log("Datos", selectedFileId, selectedFileContent); // TODO: Eliminar console.log en producción.
+    const idDealEnv = new URLSearchParams(window.location.search).get("idDeal");
+    const WEBHOOK = getWebhookAgent();
     const peti = await fetch(`${WEBHOOK}/agent`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ query: `Realiza El Resumen De La Llamada De Esto ${dates.Contenido}`, idDeal: idDealEnv, userId: id}),                     // Enviando Solo Nuestros UserID.
+      body: JSON.stringify({ query: `Realiza El Resumen De La Llamada De Esto ${selectedFileContent}`, idDeal: idDealEnv, userId: userId}),
     });
-    const resp = await peti.json();                             // Obteniendo La Respuesta o Promesa De La Petición
-    console.log(resp);
+    const resp = await peti.json();
+    console.log(resp); // TODO: Eliminar console.log en producción.
   }
   
-  if (selectedFile) {
+  if (isLoading && !isContentLoaded) {
+    return (
+      <div className="loading-message">
+        <div className="spinner"></div>
+        <p>Cargando {selectedFileId ? "contenido del archivo" : "archivos de Google Drive"}...</p>
+      </div>
+    );
+  }
+
+  if (selectedFileId && isContentLoaded) {
     return (
       <div className="divFunciones">
         <div className="primerasFunciones">
-          <button className="divFunc1" onClick={() => ResumenLlamada(selectedFile)}>
+          <button className="divFunc1" onClick={handleCallSummary}>
             <div className="divFunc1Icono">
               <BookText size={40}/>
             </div>
@@ -199,36 +233,56 @@ function TranscriptionList() {
           </div>
         </div>
         <button
-          onClick={() => setSelectedFile(null)}
+          onClick={() => {
+            setSelectedFileId(null);
+            setSelectedFileContent(null);
+            setIsContentLoaded(false);
+            setFileContentError(null);
+          }}
           className="buttonReturn"
         >
           Volver a la lista
         </button>
+        {fileContentError && <div className="error-message">{fileContentError}</div>}
+        {selectedFileContent && (
+          <div className="file-content-display">
+            <h2>Contenido del Archivo:</h2>
+            <pre>{selectedFileContent}</pre>
+          </div>
+        )}
       </div>
     );
   }
+  
+  if (error) {
+    return null;
+  }
 
   /**
-   * De No Existir Nada En selectedFile, Retornamos Carpetas o Archivos
+   * Renderiza la lista de archivos y carpetas de Google Drive.
+   * Incluye un botón "Volver" condicionalmente visible si hay historial de navegación.
+   * También muestra un mensaje si la carpeta actual está vacía y no hay errores ni carga.
    */
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        height: "800px",        // 👈 usa height fijo, no solo maxHeight
-        overflowY: "auto",      // scroll vertical
-        overflowX: "hidden",    // oculta horizontal
-        boxSizing: "border-box" // asegura que paddings no sumen
-    }}
-    >
-      {items.map((item) => (
+    <div className="divTranscriptionList">
+      {folderHistory.length > 1 && (
+        <button onClick={handleBackClick} className="back-button-style">
+          <ArrowLeft size={20} />
+          Volver a la carpeta anterior
+        </button>
+      )}
+      {driveItems.length === 0 && !isLoading && !error && (
+        <div className="empty-folder-message">
+          <p>Esta carpeta no contiene archivos.</p>
+        </div>
+      )}
+      {driveItems.map((item) => (
         <FileOrFolder
           key={item.id}
-          item={item}
-          setItems={setItems}
-          setSelectedFile={setSelectedFile}
+          id={item.id}
+          name={item.name}
+          mimeType={item.mimeType}
+          onItemClick={handleItemClick}
         />
       ))}
     </div>
