@@ -4,6 +4,9 @@ import TranscriptionList from '../TranscriptionList';
 import { vi } from 'vitest';
 import * as NotificationSystem from '../NotificationSystem';
 import * as TranscriptionListService from '../TranscriptionList';
+import FileOrFolder from '../FileOrFolder'; // Importar FileOrFolder para mockearlo
+import DocActions from '../DocActions'; // Importar DocActions para mockearlo
+import AIChat from '../AIChat'; // Importar AIChat para mockearlo
 
 // Mock de fetch para simular las llamadas a la API
 const mockFetch = vi.fn();
@@ -14,88 +17,181 @@ vi.spyOn(NotificationSystem, 'showNotification').mockImplementation(() => {});
 
 const userId = 'testUser';
 
-describe('TranscriptionList DocActions Visibility', () => {
+// Mockear los componentes hijos para aislar la prueba de TranscriptionList
+vi.mock('../FileOrFolder', () => ({
+  default: vi.fn(({ onItemClick, ...props }) => (
+    <div data-testid="file-or-folder" onClick={() => onItemClick(props.id, props.name, props.mimeType)}>
+      {props.name}
+    </div>
+  )),
+}));
+
+vi.mock('../DocActions', () => ({
+  default: vi.fn(({ onActionClick }) => (
+    <div data-testid="doc-actions">
+      <button onClick={() => onActionClick('summarize')}>Resumen de la Llamada</button>
+      <button onClick={() => onActionClick('proposal')}>Propuesta</button>
+      <button onClick={() => onActionClick('questions')}>Preguntas</button>
+      <button onClick={() => onActionClick('actions')}>Acciones</button>
+    </div>
+  )),
+}));
+
+vi.mock('../AIChat', () => ({
+  default: vi.fn(({ documentContent }) => (
+    <div data-testid="ai-chat">AI Chat with: {documentContent ? documentContent.substring(0, 20) : 'no content'}</div>
+  )),
+}));
+
+describe('TranscriptionList DocActions and AIChat Interaction', () => {
   beforeEach(() => {
     mockFetch.mockClear();
     NotificationSystem.showNotification.mockClear();
-    // Restablecer los mocks de servicio antes de cada prueba
     vi.restoreAllMocks();
     vi.spyOn(NotificationSystem, 'showNotification').mockImplementation(() => {});
+    vi.spyOn(TranscriptionListService, 'fetchFolderContents').mockResolvedValue([]);
+    vi.spyOn(TranscriptionListService, 'fetchFileContents').mockResolvedValue('Contenido de archivo mockeado');
 
-    // Mock la URL para que siempre tenga un userId
     Object.defineProperty(window, 'location', {
       value: {
         search: `?userId=${userId}`,
       },
       writable: true,
     });
+
+    // Mock para la llamada inicial a DriveRoot
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: () => Promise.resolve({ GoogleDrive: { files: [] } }),
+    });
   });
 
-  it('should render DocActions when a .doc file is selected', async () => {
-    // Mock para fetchDriveItems (para la carga inicial si es necesario)
-    vi.spyOn(TranscriptionListService, 'fetchFolderContents').mockResolvedValueOnce([]);
+  it('should render DocActions when a .doc file is selected and activate AIChat on action click', async () => {
+    // Mock de fetchFolderContents para simular la navegación (si fuera necesario)
+    TranscriptionListService.fetchFolderContents.mockResolvedValueOnce([
+      { id: 'doc123', name: 'Documento.docx', mimeType: 'application/vnd.google-apps.document' },
+    ]);
 
-    // Mock para fetchFileContents
-    vi.spyOn(TranscriptionListService, 'fetchFileContents').mockResolvedValueOnce('Contenido del archivo .doc');
+    // Mock de fetchFileContents para el contenido del .doc
+    TranscriptionListService.fetchFileContents.mockResolvedValueOnce('Contenido del documento .doc para IA.');
 
-    const { rerender } = render(<TranscriptionList userId={userId} />);
+    render(<TranscriptionList userId={userId} />);
 
-    const docFile = {
-      id: 'doc123',
-      name: 'Documento.docx',
-      mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    };
+    // Simular la carga inicial (podría ser la raíz vacía o con un archivo)
+    await waitFor(() => {
+      expect(mockFetch).toHaveBeenCalledWith(
+        expect.stringContaining('/DriveRoot'),
+        expect.any(Object)
+      );
+    });
     
-    // Simular la selección de un archivo .doc llamando directamente a handleItemClick (o simulando su efecto)
-    // Esto es un enfoque para la prueba unitaria sin depender del DOM completo de FileOrFolder
-    // En una prueba de integración se haría fireEvent.click en el FileOrFolder
+    // Cargar la lista de items para simular el click
+    mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ GoogleDrive: { files: [
+            { id: 'doc123', name: 'Documento.docx', mimeType: 'application/vnd.google-apps.document' },
+        ] } }),
+    });
+    fireEvent.click(screen.getByText('Documento.docx')); // Simular clic en el archivo .doc
+
     await waitFor(() => {
-      rerender(
-        <TranscriptionList
-          userId={userId}
-          // Props simuladas para controlar el estado interno del componente para la prueba
-          initialSelectedFile={docFile}
-          initialFileContent={'Contenido del archivo .doc'}
-          initialIsDocSelected={true} // Forzar el estado para que DocActions sea visible
-        />
+      expect(TranscriptionListService.fetchFileContents).toHaveBeenCalledWith(
+        { id: 'doc123', name: 'Documento.docx', mimeType: 'application/vnd.google-apps.document' },
+        userId
       );
     });
 
-    expect(screen.getByText('Resumen de la Llamada')).toBeInTheDocument();
-    expect(screen.getByText('Propuesta')).toBeInTheDocument();
-    expect(screen.getByText('Preguntas')).toBeInTheDocument();
-    expect(screen.getByText('Acciones')).toBeInTheDocument();
+    // Verificar que DocActions es visible
+    expect(screen.getByTestId('doc-actions')).toBeInTheDocument();
+    expect(screen.queryByTestId('ai-chat')).not.toBeInTheDocument(); // AIChat no debe ser visible todavía
+
+    // Simular clic en un botón de acción de DocActions
+    fireEvent.click(screen.getByText('Resumen de la Llamada'));
+
+    // Verificar que AIChat se activa y recibe el contenido del documento
+    await waitFor(() => {
+      expect(screen.getByTestId('ai-chat')).toBeInTheDocument();
+      expect(screen.getByText('AI Chat with: Contenido del documen')).toBeInTheDocument();
+    });
   });
 
-  it('should hide DocActions when a non-.doc file is selected', async () => {
-    // Mock para fetchDriveItems
-    vi.spyOn(TranscriptionListService, 'fetchFolderContents').mockResolvedValueOnce([]);
+  it('should hide DocActions and AIChat when a non-.doc file is selected', async () => {
+    // Mock de fetchFolderContents
+    TranscriptionListService.fetchFolderContents.mockResolvedValueOnce([
+      { id: 'txt123', name: 'Notas.txt', mimeType: 'text/plain' },
+    ]);
+    TranscriptionListService.fetchFileContents.mockResolvedValueOnce('Contenido del archivo .txt');
 
-    // Mock para fetchFileContents
-    vi.spyOn(TranscriptionListService, 'fetchFileContents').mockResolvedValueOnce('Contenido del archivo .txt');
-
-    const { rerender } = render(<TranscriptionList userId={userId} />);
-
-    const txtFile = {
-      id: 'txt123',
-      name: 'Notas.txt',
-      mimeType: 'text/plain',
-    };
+    render(<TranscriptionList userId={userId} />);
 
     await waitFor(() => {
-      rerender(
-        <TranscriptionList
-          userId={userId}
-          initialSelectedFile={txtFile}
-          initialFileContent={'Contenido del archivo .txt'}
-          initialIsDocSelected={false} // Forzar el estado para que DocActions sea oculto
-        />
+      expect(mockFetch).toHaveBeenCalledWith(
+        expect.stringContaining('/DriveRoot'),
+        expect.any(Object)
       );
     });
 
-    expect(screen.queryByText('Resumen de la Llamada')).not.toBeInTheDocument();
-    expect(screen.queryByText('Propuesta')).not.toBeInTheDocument();
-    expect(screen.queryByText('Preguntas')).not.toBeInTheDocument();
-    expect(screen.queryByText('Acciones')).not.toBeInTheDocument();
+    // Cargar la lista de items para simular el click
+    mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ GoogleDrive: { files: [
+            { id: 'txt123', name: 'Notas.txt', mimeType: 'text/plain' },
+        ] } }),
+    });
+    fireEvent.click(screen.getByText('Notas.txt')); // Simular clic en el archivo .txt
+
+    await waitFor(() => {
+      expect(TranscriptionListService.fetchFileContents).toHaveBeenCalledWith(
+        { id: 'txt123', name: 'Notas.txt', mimeType: 'text/plain' },
+        userId
+      );
+    });
+
+    // Verificar que DocActions y AIChat no son visibles
+    expect(screen.queryByTestId('doc-actions')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('ai-chat')).not.toBeInTheDocument();
+  });
+
+  it('should deactivate AIChat when returning to list view', async () => {
+    // Mock de fetchFolderContents para simular la navegación
+    TranscriptionListService.fetchFolderContents.mockResolvedValueOnce([
+      { id: 'doc123', name: 'Documento.docx', mimeType: 'application/vnd.google-apps.document' },
+    ]);
+    TranscriptionListService.fetchFileContents.mockResolvedValueOnce('Contenido del documento .doc para IA.');
+
+    render(<TranscriptionList userId={userId} />);
+
+    await waitFor(() => {
+        expect(mockFetch).toHaveBeenCalledWith(
+            expect.stringContaining('/DriveRoot'),
+            expect.any(Object)
+        );
+    });
+    
+    // Cargar la lista de items para simular el click
+    mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ GoogleDrive: { files: [
+            { id: 'doc123', name: 'Documento.docx', mimeType: 'application/vnd.google-apps.document' },
+        ] } }),
+    });
+    fireEvent.click(screen.getByText('Documento.docx')); // Simular clic en el archivo .doc
+
+    await waitFor(() => {
+      expect(screen.getByTestId('doc-actions')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByText('Resumen de la Llamada')); // Activar chat de IA
+
+    await waitFor(() => {
+      expect(screen.getByTestId('ai-chat')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByText('Volver a la lista')); // Volver a la lista
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('ai-chat')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('doc-actions')).not.toBeInTheDocument(); // DocActions también debería ocultarse
+    });
   });
 });

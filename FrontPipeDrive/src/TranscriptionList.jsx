@@ -6,6 +6,7 @@ import { MoreVertical, Smile, Frown, Meh, Folder, File, BookText, Bold, Key, Arr
 import { showNotification } from "./NotificationSystem";
 import FileOrFolder from "./FileOrFolder";
 import DocActions from "./DocActions";
+import AIChat from "./AIChat";
 
 /**
  * Obtiene la URL del webhook de NGROK desde las variables de entorno.
@@ -39,7 +40,7 @@ export async function fetchFolderContents(item, userId){
 /**
  * Ve el contenido de un archivo.
  * @param {object} item - Objeto con id, mimeType y name del archivo.
- * @param {string} userId - El ID del usuario actual.
+ * @param {string} userId - El ID del usuario actual.\
  * @returns {string} El contenido del archivo.
  */
 export async function fetchFileContents(item, userId) {
@@ -68,9 +69,12 @@ function TranscriptionList({ userId }) {
   const [folderHistory, setFolderHistory] = useState(["root"]);
   const [selectedFileContent, setSelectedFileContent] = useState(null);
   const [selectedFileId, setSelectedFileId] = useState(null);
+  const [selectedFileName, setSelectedFileName] = useState(null); // Nuevo estado para el nombre del archivo seleccionado
   const [isContentLoaded, setIsContentLoaded] = useState(false);
   const [fileContentError, setFileContentError] = useState(null);
   const [isDocSelected, setIsDocSelected] = useState(false); // Estado para controlar la visibilidad del componente DocActions basado en si el archivo seleccionado es un documento .doc.
+  const [isAIChatActive, setIsAIChatActive] = useState(false); // Estado para controlar la visibilidad del chat de IA.
+  const [initialAiResponse, setInitialAiResponse] = useState(null); // Nuevo estado para almacenar la respuesta inicial de la IA
 
   // MimeTypes específicos que corresponden a archivos de documentos (.doc, .docx, Google Docs).
   const docMimeTypes = [
@@ -135,6 +139,8 @@ function TranscriptionList({ userId }) {
       setError(null);
       // Cuando se navega a una carpeta, se asume que no hay un .doc seleccionado.
       setIsDocSelected(false);
+      setIsAIChatActive(false); // Asegurarse de que el chat se desactive al navegar a una carpeta
+      setInitialAiResponse(null); // Limpiar la respuesta inicial de la IA
       try {
         const datesArchivos = await fetchFolderContents({ id, name, mimeType }, userId);
         setDriveItems(datesArchivos);
@@ -154,10 +160,13 @@ function TranscriptionList({ userId }) {
       setIsContentLoaded(false);
       setFileContentError(null);
       setIsLoading(true);
+      setIsAIChatActive(false); // Desactivar el chat de IA al seleccionar un nuevo archivo
+      setInitialAiResponse(null); // Limpiar la respuesta inicial de la IA
 
       // Determinar si el archivo seleccionado es un documento .doc y actualizar el estado isDocSelected.
       const isCurrentFileDoc = docMimeTypes.includes(mimeType);
       setIsDocSelected(isCurrentFileDoc);
+      setSelectedFileName(name); // Guardar el nombre del archivo seleccionado
 
       try {
         const fileContents = await fetchFileContents({ id, name, mimeType }, userId);
@@ -185,11 +194,27 @@ function TranscriptionList({ userId }) {
       const previousFolderId = newStack[newStack.length - 1];
       setFolderHistory(newStack);
       setCurrentFolderId(previousFolderId);
+      setIsAIChatActive(false); // Desactivar el chat al volver a una carpeta anterior
+      setInitialAiResponse(null); // Limpiar la respuesta inicial de la IA
       await fetchDriveItems(previousFolderId);
       showNotification("Volviendo a la carpeta anterior.", 'info');
     } else {
       showNotification("Ya estás en la raíz de Google Drive.", 'info');
     }
+  };
+
+  /**
+   * Maneja el clic en el botón "Volver" del chat de IA.
+   * Reinicia los estados relacionados con el archivo seleccionado y el chat de IA.
+   */
+  const handleBackFromChatClick = () => {
+    setSelectedFileId(null);
+    setSelectedFileContent(null);
+    setIsContentLoaded(false);
+    setFileContentError(null);
+    setIsAIChatActive(false);
+    setSelectedFileName(null); // Limpiar el nombre del archivo seleccionado
+    setInitialAiResponse(null); // Limpiar la respuesta inicial de la IA
   };
 
   /**
@@ -203,27 +228,49 @@ function TranscriptionList({ userId }) {
   }, [currentFolderId, userId]);
 
   /**
-   * Maneja el resumen de una llamada a partir del contenido de un archivo seleccionado.
-   * Envía el ID y el contenido del archivo a una API de agente para su procesamiento.
-   * Muestra notificaciones de advertencia si no hay un archivo seleccionado.
+   * Maneja el clic en una acción de documento.
+   * Activa el chat de IA y, si la acción es 'summarize', envía una solicitud a la API /agent.
+   * @param {string} actionType - El tipo de acción que se ha hecho clic (e.g., 'summarize', 'proposal').
    */
-  async function handleCallSummary() {
-    if (!selectedFileContent || !selectedFileId) {
-      showNotification("No hay archivo seleccionado para resumir.", 'warning');
-      return;
+  const handleDocActionClick = async (actionType) => {
+    setIsAIChatActive(true); // Siempre activar el chat al hacer clic en una acción de documento
+    console.log(`Acción de documento clicada: ${actionType}`); // TODO: Eliminar console.log en producción.
+
+    if (actionType === 'summarize') {
+      if (!selectedFileContent || !selectedFileId) {
+        showNotification("No hay archivo seleccionado para resumir.", 'warning');
+        return;
+      }
+      setIsLoading(true); // Activar el spinner de carga
+      showNotification("Generando resumen de la llamada...", 'info');
+      const idDealEnv = new URLSearchParams(window.location.search).get("idDeal");
+      console.log(`idDealEnv: ${idDealEnv}`); // TODO: Eliminar console.log en producción.
+      const WEBHOOK = getWebhookAgent();
+      try {
+        const peti = await fetch(`${WEBHOOK}/agent`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ query: `Realiza El Resumen De La Llamada De Esto ${selectedFileContent}`, idDeal: idDealEnv, userId: userId}),
+        });
+        if (!peti.ok) {
+          throw new Error(`Error al solicitar resumen: ${peti.status}`);
+        }
+        const resp = await peti.json();
+        console.log(resp); // TODO: Eliminar console.log en producción.
+        setInitialAiResponse(resp.respuesta); // Guardar la respuesta del Agente en el estado
+        showNotification("Resumen de la llamada generado con éxito.", 'success');
+      } catch (err) {
+        console.error("Error al generar resumen:", err);
+        showNotification("Error al generar el resumen de la llamada.", 'error');
+      } finally {
+        setIsLoading(false); // Desactivar el spinner de carga
+      }
+    } else {
+        // Para otras acciones, simplemente activamos el chat de IA por ahora
+        showNotification(`Funcionalidad '${actionType}' en desarrollo.`, 'info');
     }
-    console.log("Datos", selectedFileId, selectedFileContent); // TODO: Eliminar console.log en producción.
-    const idDealEnv = new URLSearchParams(window.location.search).get("idDeal");
-    const WEBHOOK = getWebhookAgent();
-    const peti = await fetch(`${WEBHOOK}/agent`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ query: `Realiza El Resumen De La Llamada De Esto ${selectedFileContent}`, idDeal: idDealEnv, userId: userId}),
-    });
-    const resp = await peti.json();
-    console.log(resp); // TODO: Eliminar console.log en producción.
-  }
-  
+  };
+
   if (isLoading && !isContentLoaded) {
     return (
       <div className="loading-message">
@@ -236,32 +283,30 @@ function TranscriptionList({ userId }) {
   if (selectedFileId && isContentLoaded) {
     return (
       <div className="divFunciones">
-        {/* Renderiza el componente DocActions condicionalmente si el archivo seleccionado es un .doc. */}
-        {isDocSelected && (
-          <DocActions
-            onSummarizeClick={handleCallSummary} // Usar handleCallSummary para el resumen de la llamada
-            onProposalClick={() => showNotification("Funcionalidad 'Propuesta' en desarrollo.", 'info')}
-            onQuestionsClick={() => showNotification("Funcionalidad 'Preguntas' en desarrollo.", 'info')}
-            onActionsClick={() => showNotification("Funcionalidad 'Acciones' en desarrollo.", 'info')}
+        {isAIChatActive ? (
+          <AIChat
+            documentContent={selectedFileContent}
+            documentTitle={selectedFileName} // Pasar el nombre del archivo al chat
+            documentId={selectedFileId} // Asegúrate de pasar el documentId
+            userId={userId} // Asegúrate de pasar el userId
+            onBackClick={handleBackFromChatClick} // Pasar la función para volver
+            initialAiResponse={initialAiResponse} // Pasar la respuesta inicial de la IA
           />
-        )}
-        <button
-          onClick={() => {
-            setSelectedFileId(null);
-            setSelectedFileContent(null);
-            setIsContentLoaded(false);
-            setFileContentError(null);
-          }}
-          className="buttonReturn"
-        >
-          Volver a la lista
-        </button>
-        {fileContentError && <div className="error-message">{fileContentError}</div>}
-        {selectedFileContent && (
-          <div className="file-content-display">
-            <h2>Contenido del Archivo:</h2>
-            <pre>{selectedFileContent}</pre>
-          </div>
+        ) : (
+          <>
+            {isDocSelected && (
+              <DocActions
+                onActionClick={handleDocActionClick} // Usar handleDocActionClick para todas las acciones de DocActions
+              />
+            )}
+            {fileContentError && <div className="error-message">{fileContentError}</div>}
+            {selectedFileContent && (
+              <div className="file-content-display">
+                <h2>Contenido del Archivo:</h2>
+                <pre>{selectedFileContent}</pre>
+              </div>
+            )}
+          </>
         )}
       </div>
     );

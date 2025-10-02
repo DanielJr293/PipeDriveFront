@@ -4,38 +4,29 @@ import { vi } from 'vitest';
 
 describe('DocActions', () => {
   it('should render all action buttons correctly', () => {
-    render(<DocActions />);
+    render(<DocActions onActionClick={() => {}} />); // onActionClick es ahora requerido
     expect(screen.getByText('Resumen de la Llamada')).toBeInTheDocument();
     expect(screen.getByText('Propuesta')).toBeInTheDocument();
     expect(screen.getByText('Preguntas')).toBeInTheDocument();
     expect(screen.getByText('Acciones')).toBeInTheDocument();
   });
 
-  it('should call onSummarizeClick when "Resumen de la Llamada" button is clicked', () => {
-    const mockOnSummarizeClick = vi.fn();
-    render(<DocActions onSummarizeClick={mockOnSummarizeClick} />);
+  it('should call onActionClick with the correct actionType when a button is clicked', () => {
+    const mockOnActionClick = vi.fn();
+    render(<DocActions onActionClick={mockOnActionClick} />);
+
     fireEvent.click(screen.getByText('Resumen de la Llamada'));
-    expect(mockOnSummarizeClick).toHaveBeenCalledTimes(1);
-  });
+    expect(mockOnActionClick).toHaveBeenCalledWith('summarize');
 
-  it('should call onProposalClick when "Propuesta" button is clicked', () => {
-    const mockOnProposalClick = vi.fn();
-    render(<DocActions onProposalClick={mockOnProposalClick} />);
     fireEvent.click(screen.getByText('Propuesta'));
-    expect(mockOnProposalClick).toHaveBeenCalledTimes(1);
-  });
+    expect(mockOnActionClick).toHaveBeenCalledWith('proposal');
 
-  it('should call onQuestionsClick when "Preguntas" button is clicked', () => {
-    const mockOnQuestionsClick = vi.fn();
-    render(<DocActions onQuestionsClick={mockOnQuestionsClick} />);
     fireEvent.click(screen.getByText('Preguntas'));
-    expect(mockOnQuestionsClick).toHaveBeenCalledTimes(1);
-  });
+    expect(mockOnActionClick).toHaveBeenCalledWith('questions');
 
-  it('should call onActionsClick when "Acciones" button is clicked', () => {
-    const mockOnActionsClick = vi.fn();
-    render(<DocActions onActionsClick={mockOnActionsClick} />);
     fireEvent.click(screen.getByText('Acciones'));
-    expect(mockOnActionsClick).toHaveBeenCalledTimes(1);
+    expect(mockOnActionClick).toHaveBeenCalledWith('actions');
+
+    expect(mockOnActionClick).toHaveBeenCalledTimes(4);
   });
 });
