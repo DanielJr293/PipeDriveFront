@@ -75,6 +75,7 @@ function TranscriptionList({ userId }) {
   const [isDocSelected, setIsDocSelected] = useState(false); // Estado para controlar la visibilidad del componente DocActions basado en si el archivo seleccionado es un documento .doc.
   const [isAIChatActive, setIsAIChatActive] = useState(false); // Estado para controlar la visibilidad del chat de IA.
   const [initialAiResponse, setInitialAiResponse] = useState(null); // Nuevo estado para almacenar la respuesta inicial de la IA
+  const [isInitialAiResponseLoading, setIsInitialAiResponseLoading] = useState(false); // Nuevo estado para indicar si la respuesta inicial de la IA está cargando
 
   // MimeTypes específicos que corresponden a archivos de documentos (.doc, .docx, Google Docs).
   const docMimeTypes = [
@@ -141,6 +142,7 @@ function TranscriptionList({ userId }) {
       setIsDocSelected(false);
       setIsAIChatActive(false); // Asegurarse de que el chat se desactive al navegar a una carpeta
       setInitialAiResponse(null); // Limpiar la respuesta inicial de la IA
+      setIsInitialAiResponseLoading(false); // Reiniciar estado de carga
       try {
         const datesArchivos = await fetchFolderContents({ id, name, mimeType }, userId);
         setDriveItems(datesArchivos);
@@ -162,6 +164,7 @@ function TranscriptionList({ userId }) {
       setIsLoading(true);
       setIsAIChatActive(false); // Desactivar el chat de IA al seleccionar un nuevo archivo
       setInitialAiResponse(null); // Limpiar la respuesta inicial de la IA
+      setIsInitialAiResponseLoading(false); // Reiniciar estado de carga
 
       // Determinar si el archivo seleccionado es un documento .doc y actualizar el estado isDocSelected.
       const isCurrentFileDoc = docMimeTypes.includes(mimeType);
@@ -196,6 +199,7 @@ function TranscriptionList({ userId }) {
       setCurrentFolderId(previousFolderId);
       setIsAIChatActive(false); // Desactivar el chat al volver a una carpeta anterior
       setInitialAiResponse(null); // Limpiar la respuesta inicial de la IA
+      setIsInitialAiResponseLoading(false); // Reiniciar estado de carga
       await fetchDriveItems(previousFolderId);
       showNotification("Volviendo a la carpeta anterior.", 'info');
     } else {
@@ -215,6 +219,7 @@ function TranscriptionList({ userId }) {
     setIsAIChatActive(false);
     setSelectedFileName(null); // Limpiar el nombre del archivo seleccionado
     setInitialAiResponse(null); // Limpiar la respuesta inicial de la IA
+    setIsInitialAiResponseLoading(false); // Reiniciar estado de carga
   };
 
   /**
@@ -241,7 +246,8 @@ function TranscriptionList({ userId }) {
         showNotification("No hay archivo seleccionado para resumir.", 'warning');
         return;
       }
-      setIsLoading(true); // Activar el spinner de carga
+      setIsLoading(true); // Activar el spinner de carga general
+      setIsInitialAiResponseLoading(true); // Activar el spinner de carga inicial de la IA
       showNotification("Generando resumen de la llamada...", 'info');
       const idDealEnv = new URLSearchParams(window.location.search).get("idDeal");
       console.log(`idDealEnv: ${idDealEnv}`); // TODO: Eliminar console.log en producción.
@@ -263,7 +269,8 @@ function TranscriptionList({ userId }) {
         console.error("Error al generar resumen:", err);
         showNotification("Error al generar el resumen de la llamada.", 'error');
       } finally {
-        setIsLoading(false); // Desactivar el spinner de carga
+        setIsLoading(false); // Desactivar el spinner de carga general
+        setIsInitialAiResponseLoading(false); // Desactivar el spinner de carga inicial de la IA
       }
     } else {
         // Para otras acciones, simplemente activamos el chat de IA por ahora
@@ -291,6 +298,7 @@ function TranscriptionList({ userId }) {
             userId={userId} // Asegúrate de pasar el userId
             onBackClick={handleBackFromChatClick} // Pasar la función para volver
             initialAiResponse={initialAiResponse} // Pasar la respuesta inicial de la IA
+            isInitialAiResponseLoading={isInitialAiResponseLoading} // Pasar el estado de carga de la respuesta inicial
           />
         ) : (
           <>

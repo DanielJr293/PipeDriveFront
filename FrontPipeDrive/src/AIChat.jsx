@@ -5,7 +5,7 @@ import { showNotification } from "./NotificationSystem"; // Asumiendo que Notifi
 // Obtiene la URL del webhook del agente desde las variables de entorno.
 const getWebhookAgent = () => import.meta.env.VITE_URL_AGENT;
 
-function AIChat({ documentContent, documentTitle, documentId, userId, onBackClick, initialAiResponse }) {
+function AIChat({ documentContent, documentTitle, documentId, userId, onBackClick, initialAiResponse, isInitialAiResponseLoading }) {
   const [message, setMessage] = useState('');
   const [chatMessages, setChatMessages] = useState([]);
   const [isSending, setIsSending] = useState(false); // Estado para el indicador de carga del input
@@ -18,12 +18,14 @@ function AIChat({ documentContent, documentTitle, documentId, userId, onBackClic
     }
   }, [chatMessages]);
 
-  // Mensaje inicial de bienvenida de la IA o respuesta inicial del Agente
+  // Mensaje inicial de bienvenida de la IA, indicador de carga o respuesta inicial del Agente
   useEffect(() => {
-    // Solo añadir el mensaje inicial si no hay mensajes en el chat y se tiene contenido o una respuesta inicial.
-    // También manejar el caso en que initialAiResponse llega después del mensaje de bienvenida.
-    if (chatMessages.length === 0 && (initialAiResponse || documentContent)) {
-      if (initialAiResponse) {
+    if (chatMessages.length === 0) {
+      if (isInitialAiResponseLoading) {
+        setChatMessages([
+          { sender: 'ai', text: 'Generando Respuesta...', isLoading: true } // Mensaje de carga inicial
+        ]);
+      } else if (initialAiResponse) {
         setChatMessages([
           { sender: 'ai', text: initialAiResponse }
         ]);
@@ -32,19 +34,29 @@ function AIChat({ documentContent, documentTitle, documentId, userId, onBackClic
           { sender: 'ai', text: 'Hola, ¿en qué puedo ayudarte hoy con esta transcripción?' }
         ]);
       }
+    } else if (chatMessages.length === 1 && chatMessages[0].isLoading && !isInitialAiResponseLoading && initialAiResponse) {
+      // Si ya está el mensaje de carga, y luego llega initialAiResponse, reemplazarlo.
+      setChatMessages([
+        { sender: 'ai', text: initialAiResponse }
+      ]);
     } else if (chatMessages.length === 1 && chatMessages[0].text === 'Hola, ¿en qué puedo ayudarte hoy con esta transcripción?' && initialAiResponse) {
       // Si ya está el mensaje de bienvenida, y luego llega initialAiResponse, reemplazarlo.
       setChatMessages([
         { sender: 'ai', text: initialAiResponse }
       ]);
+    } else if (chatMessages.length === 1 && chatMessages[0].text === 'Escribiendo...' && !isInitialAiResponseLoading && !initialAiResponse && documentContent) {
+        // Si estaba cargando y luego se cancela/error sin respuesta inicial, volver al mensaje de bienvenida
+        setChatMessages([
+          { sender: 'ai', text: 'Hola, ¿en qué puedo ayudarte hoy con esta transcripción?' }
+        ]);
     }
-  }, [documentContent, initialAiResponse, chatMessages.length]);
+  }, [documentContent, initialAiResponse, isInitialAiResponseLoading, chatMessages.length]);
 
   const handleSendMessage = async () => {
     if (message.trim() === '' || isSending) return;
 
     const userMessage = { text: message, sender: 'user' };
-    setChatMessages((prev) => [...prev, userMessage]);
+    setChatMessages((prev) => [...prev, userMessage, { sender: 'ai', text: 'Generando Respuesta...', isLoading: true }]); // Añadir mensaje de usuario y el indicador de carga de la IA
     setMessage('');
     setIsSending(true); // Activar carga
 
@@ -70,12 +82,21 @@ function AIChat({ documentContent, documentTitle, documentId, userId, onBackClic
       const data = await response.json();
       console.log("Respuesta completa del Agente:", data); // Mantener este console.log para futuras depuraciones si es necesario
       const aiResponse = { text: data.respuesta || "No pude obtener una respuesta. Intenta de nuevo.", sender: 'ai' }; // Cambiado de data.response a data.respuesta
-      setChatMessages((prev) => [...prev, aiResponse]);
+
+      setChatMessages((prev) => {
+        const newMessages = prev.filter(msg => !msg.isLoading); // Eliminar el mensaje de carga
+        return [...newMessages, aiResponse]; // Añadir la respuesta real
+      });
+
       showNotification("Mensaje enviado y respuesta recibida.", 'success');
     } catch (error) {
       console.error("Error al enviar mensaje a la IA:", error);
       showNotification("Error al comunicarse con la IA.", 'error');
-      setChatMessages((prev) => [...prev, { sender: 'ai', text: 'Lo siento, hubo un error al procesar tu solicitud.' }]);
+
+      setChatMessages((prev) => {
+        const newMessages = prev.filter(msg => !msg.isLoading); // Eliminar el mensaje de carga
+        return [...newMessages, { sender: 'ai', text: 'Lo siento, hubo un error al procesar tu solicitud.' }]; // Añadir mensaje de error
+      });
     } finally {
       setIsSending(false); // Desactivar carga
     }
@@ -119,14 +140,7 @@ function AIChat({ documentContent, documentTitle, documentId, userId, onBackClic
             </div>
           ))
         )}
-        {isSending && (
-          <div className="flex justify-start">
-            <div className="ai-chat-typing-indicator">
-              <Bot size={18} />
-              <span>Escribiendo...</span>
-            </div>
-          </div>
-        )}
+        {/* isSending se maneja dentro del input ahora, pero el estado para la primera respuesta es diferente */}
       </div>
 
       {/* Input del Chat */}
