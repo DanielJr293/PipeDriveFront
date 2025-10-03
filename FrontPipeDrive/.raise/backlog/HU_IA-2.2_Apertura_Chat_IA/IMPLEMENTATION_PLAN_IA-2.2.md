@@ -31,7 +31,7 @@
 - [x] Modificar `TranscriptionList.jsx` para incluir un estado `isAIChatActive`. (Ref: L2-02-react-state-management.mdc)
 - [x] Implementar una función `handleDocActionClick(actionType)` en `TranscriptionList.jsx` que: (Ref: L2-05-react-conditional-rendering.mdc)
     - [x] Establezca `isAIChatActive` a `true`.
-    - [ ] Podría, en el futuro, usar `actionType` para pre-poblar el chat o hacer una primera llamada a la IA.
+    - [x] Podría, en el futuro, usar `actionType` para pre-poblar el chat o hacer una primera llamada a la IA.
 - [x] Pasar `handleDocActionClick` como prop `onActionClick` a `DocActions.jsx`.
 - [x] Renderizar condicionalmente el componente `AIChat.jsx` en `TranscriptionList.jsx` solo cuando `isAIChatActive` sea `true`. (Ref: L2-05-react-conditional-rendering.mdc)
 - [x] Pasar el `selectedFileContent` actual a `AIChat.jsx` como prop.
@@ -50,13 +50,13 @@
 
 ### 5. Integración de Componentes
 
-- [ ] Verificar que al seleccionar un archivo `.doc` y luego hacer clic en un botón de acción en `DocActions.jsx`, el componente `AIChat.jsx` se activa y se muestra, recibiendo el contenido del documento.
+- [x] Verificar que al seleccionar un archivo `.doc` y luego hacer clic en un botón de acción en `DocActions.jsx`, el componente `AIChat.jsx` se activa y se muestra, recibiendo el contenido del documento.
 
 ### 6. Pruebas de Aceptación
 
-- [ ] Verificar AC: Dado que el componente `DocActions.jsx` está visible, cuando hago clic en cualquiera de sus botones de acción, entonces el componente `AIChat.jsx` debe activarse y volverse visible. (Estrategia guiada por L3-05 Testing Estratégico)
-- [ ] Verificar AC: El contenido del archivo `.doc` previamente seleccionado debe ser accesible para el componente `AIChat.jsx`. (Estrategia guiada por L3-05 Testing Estratégico)
-- [ ] Verificar AC: Se debe establecer un estado (`isAIChatActive`) para controlar la visibilidad del chat. (Estrategia guiada por L3-05 Testing Estratégico)
+- [x] Verificar AC: Dado que el componente `DocActions.jsx` está visible, cuando hago clic en cualquiera de sus botones de acción, entonces el componente `AIChat.jsx` debe activarse y volverse visible. (Estrategia guiada por L3-05 Testing Estratégico)
+- [x] Verificar AC: El contenido del archivo `.doc` previamente seleccionado debe ser accesible para el componente `AIChat.jsx`. (Estrategia guiada por L3-05 Testing Estratégico)
+- [x] Verificar AC: Se debe establecer un estado (`isAIChatActive`) para controlar la visibilidad del chat. (Estrategia guiada por L3-05 Testing Estratégico)
 
 ### 7. Documentación
 

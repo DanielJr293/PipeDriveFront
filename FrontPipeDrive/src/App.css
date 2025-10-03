@@ -986,20 +986,20 @@ body.no-scroll {
 }
 
 .ai-chat-message-user {
-  align-self: flex-end;
-  background-color: var(--primary-blue);
-  color: var(--white);
-  border-bottom-right-radius: 0.4rem; /* Un poco menos redondeado en una esquina */
+    background-color: var(--primary-blue);
+    color: var(--white);
+    border-bottom-right-radius: 0.3rem; /* Esquina más aguda para el usuario */
+    margin-left: auto; /* Empuja la burbuja del usuario a la derecha */
 }
 
 .ai-chat-message-ai {
-  align-self: flex-start;
-  background-color: var(--white);
-  color: var(--text-primary);
-  border: 1px solid var(--border-light);
-  border-bottom-left-radius: 0.4rem; /* Un poco menos redondeado en una esquina */
-  display: flex;
-  align-items: flex-start;
+    background-color: var(--white);
+    color: var(--text-primary);
+    border: 1px solid var(--border-light);
+    border-bottom-left-radius: 0.3rem; /* Esquina más aguda para la IA */
+    margin-right: auto; /* Empuja la burbuja de la IA a la izquierda */
+    display: flex;
+    align-items: flex-start;
 }
 
 .ai-chat-message-ai svg {
